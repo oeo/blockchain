@@ -15,7 +15,7 @@ GENESIS = new Block({
   index: 0
   ctime: 1517012327
 
-  hash: hash.sha256(env.GENESIS_HASH_STRING)
+  hash: hash.auto(env.GENESIS_HASH_STRING)
   prev_hash: null
 
   data: []
@@ -84,32 +84,34 @@ blockchain.replace_chain = ((new_chain,cb) ->
 
 ##
 blockchain.is_valid_next_block = ((block,prev_block,cb) ->
-  if !Block.is_valid_structure(block)
-    log new Error 'Invalid block structure'
+  if !Block.is_valid_schema(block)
+    log new Error 'Invalid block (schema)'
     return cb null, false
 
   if !prev_block
     await @get_last_block defer e,prev_block
     if e then return cb e
 
-  # validate id
+  # validate index
   if block.index isnt (prev_block.index + 1)
-    log new Error 'Invalid block index'
+    log new Error 'Invalid block (`index`)'
     return cb null, false
 
   # validate prev_hash
   if block.prev_hash isnt prev_block.hash
-    log new Error 'Invalid previous block hash'
+    log new Error 'Invalid block (`prev_hash`)'
     return cb null, false
 
   # validate hash
   if block.hash isnt (calced_hash = Block.calculate_hash(block))
-    log new Error 'Invalid block hash'
+    log new Error 'Invalid block (`hash`)'
     return cb null, false
 
+  # k
   return cb null, true
 )
 
+# validate a chain (starting at the genesis block)
 blockchain.is_valid_chain = ((chain,cb) ->
 
   # validate genesis block

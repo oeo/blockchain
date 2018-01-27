@@ -23,12 +23,10 @@ peers.send = ((socket,msg) ->
   log 'Sending a message to a peer', msg
   return socket.send(JSON.stringify(msg))
 )
-
 peers.broadcast = ((msg) ->
   for socket in peers.sockets
     socket.send(JSON.stringify(msg))
 )
-
 peers.broadcast_last_block = (->
   log 'peers.broadcast_last_block()'
 
@@ -38,6 +36,17 @@ peers.broadcast_last_block = (->
   return @broadcast({
     type: MESSAGES.RESPONSE_BLOCKS
     data: [block]
+  })
+)
+peers.broadcast_all_blocks = (->
+  log 'peers.broadcast_all_blocks()'
+
+  await blockchain.get_blockchain defer e,chain
+  if e then throw e
+
+  return @broadcast({
+    type: MESSAGES.RESPONSE_BLOCKS
+    data: chain
   })
 )
 
@@ -74,32 +83,17 @@ peers.handlers = handlers = {
         # QUERY_LAST:
         # return the block height and the last block
         when MESSAGES.QUERY_LAST
-          log /QUERY_LAST/
-          await blockchain.get_last_block defer e,block
-          if e then throw e
-
-          return peers.send(socket,{
-            type: MESSAGES.RESPONSE_BLOCKS
-            data: [block]
-          })
+          peers.broadcast_last_block()
 
         # QUERY_ALL:
         # return the entire blockchain on this node
         when MESSAGES.QUERY_ALL
-          log /QUERY_ALL/
-          await blockchain.get_blockchain defer e,blocks
-          if e then throw e
-
-          return peers.send(socket,{
-            type: MESSAGES.RESPONSE_BLOCKS
-            data: blocks
-          })
+          peers.broadcast_all_blocks()
 
         # RESPONSE_BLOCKS:
         # this is a response filled with blockchain data
         when MESSAGES.RESPONSE_BLOCKS
-          log /RESPONSE_BLOCKS/
-          return handlers.incoming_blocks(msg.data)
+          handlers.incoming_blocks(msg.data)
 
       # trickle
       return false
@@ -108,7 +102,8 @@ peers.handlers = handlers = {
 
   errors: ((socket) ->
     _close = ((x) ->
-      log 'Websocket client closed'
+      log 'Websocket client disconnected'
+
       peers.sockets.splice(peers.sockets.indexOf(x),1)
     )
 

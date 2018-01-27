@@ -19,17 +19,17 @@
       }
       return this[algo].apply(this, x);
     }),
-    md5: (function(x) {
-      if (typeof x !== 'string') {
-        x = JSON.stringify(x);
-      }
-      return _.md5(x);
-    }),
     sha256: (function(x) {
       if (typeof x !== 'string') {
         x = JSON.stringify(x);
       }
       return crypto.createHash('sha256').update(x).digest('hex');
+    }),
+    md5: (function(x) {
+      if (typeof x !== 'string') {
+        x = JSON.stringify(x);
+      }
+      return _.md5(x);
     })
   };
 

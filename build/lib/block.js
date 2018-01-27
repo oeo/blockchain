@@ -15,14 +15,18 @@
     ctime: Number,
     hash: String,
     prev_hash: String,
-    data: [mongoose.Schema.Types.Mixed]
+    data: {
+      type: mongoose.Schema.Types.Mixed,
+      "default": null
+    }
   }, {
     _id: false
   });
 
   Schema.path('index').set(function(x) {
+    var _ref, _ref1;
     if (this.hash == null) {
-      this.hash = hash.sha256([this.index, this.ctime, this.prev_hash, JSON.stringify(this.data)].join(''));
+      this.hash = hash.sha256([this.index, this.ctime, (_ref = this.prev_hash) != null ? _ref : null, JSON.stringify((_ref1 = this.data) != null ? _ref1 : {})].join(''));
     }
     return x;
   });
@@ -38,18 +42,47 @@
     };
     for (k in props) {
       v = props[k];
-      if (!this[k]) {
+      if (this[k] == null) {
         return false;
       }
-      if (typeof this[k] !== v) {
+      if (v) {
+        if (typeof this[k] !== v) {
+          return false;
+        }
+      }
+    }
+    return true;
+  });
+
+  Schema.statics.is_valid_structure = (function(block_obj) {
+    var k, props, v;
+    props = {
+      index: 'number',
+      ctime: 'number',
+      hash: 'string',
+      prev_hash: 'string',
+      data: 'object'
+    };
+    if (block_obj.index === 0) {
+      delete props.prev_hash;
+    }
+    for (k in props) {
+      v = props[k];
+      if (block_obj[k] == null) {
         return false;
+      }
+      if (v) {
+        if (typeof block_obj[k] !== v) {
+          return false;
+        }
       }
     }
     return true;
   });
 
   Schema.statics.calculate_hash = (function(block_obj) {
-    return hash.sha256([block_obj.index, block_obj.ctime, block_obj.prev_hash, JSON.stringify(block_obj.data)].join(''));
+    var _ref;
+    return hash.sha256([block_obj.index, block_obj.ctime, block_obj.prev_hash, JSON.stringify((_ref = block_obj.data) != null ? _ref : {})].join(''));
   });
 
   module.exports = Block = mongoose.model('Block', Schema);

@@ -35,7 +35,7 @@ Schema.path('index').set((x)->
 )
 
 # methods
-Schema.methods.is_valid_structure = (->
+Schema.methods.is_valid_schema = (->
   props = {
     index: 'number'
     ctime: 'number'
@@ -53,7 +53,7 @@ Schema.methods.is_valid_structure = (->
 )
 
 # statics
-Schema.statics.is_valid_structure = ((block_obj) ->
+Schema.statics.is_valid_schema = ((block_obj) ->
   props = {
     index: 'number'
     ctime: 'number'
@@ -63,7 +63,7 @@ Schema.statics.is_valid_structure = ((block_obj) ->
   }
 
   # ignore `prev_hash` on the genesis block
-  if block_obj.index is 0
+  if block_obj.index is 0 and block_obj.hash is hash.auto(env.GENESIS_HASH_STRING)
     delete props.prev_hash
 
   for k,v of props

@@ -2,7 +2,7 @@
 (function() {
   var logger;
 
-  module.exports = logger = {};
+  module.exports = logger = (function() {});
 
   if (!module.parent) {
     log(/TEST/);
