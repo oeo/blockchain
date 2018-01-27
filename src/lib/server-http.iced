@@ -47,7 +47,7 @@ app.get '/peers-add', ((req,res,next) ->
 )
 
 # devel
-app.get '/dev/incr', ((req,res,next) ->
+app.get '/_/mine-block', ((req,res,next) ->
   await blockchain.generate_next_block {test:1}, defer e,next_block
   if e then return next e
 
