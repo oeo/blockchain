@@ -12,9 +12,9 @@ app.get '/', ((req,res,next) ->
   if e then return next e
 
   return res.json {
-    last: block
+    height: block.index
     difficulty: block.difficulty
-    uptime: Math.round((new Date - PROCESS_STARTED)/1000)
+    last_block: block
   }
 )
 
