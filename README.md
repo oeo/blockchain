@@ -16,7 +16,6 @@
 - wallet
 
 ### optimizations
-- websocket p2p sync
-  - allow transport of partial chain instead of entire chain during sync
-    - chain offset query support
+- allow transport of partial chain over websocket
+  - chain offset query support
 
