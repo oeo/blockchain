@@ -8,6 +8,7 @@ _ = require('wegweg')({
   globals: on
 })
 
+log _.reads(ascii) if _.exists(ascii = __dirname + '/../ascii.art')
 log CONFIG
 
 blockchain = require './lib/blockchain'
