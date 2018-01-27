@@ -3,17 +3,16 @@
 - scaling proof of work
   - automatic difficulty adjustments
   - concensus difficulty
-  - cumulative difficulty preference instead of chain length
 - rest server
 - websocket p2p syncing
+  - cumulative difficulty preference (vs just chain length)
 
 # @todo
-- proof of work
-- keypairs/accounts
+- keypairs + accounts
 - transactions (ledger/memos)
 - automatic peer discovery
 - redis persistence
-- blockchain explorer
+- chain/account explorer
 - wallet
 
 ### optimizations
