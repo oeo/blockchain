@@ -156,6 +156,45 @@ blockchain.generate_next_block = ((data,cb) ->
 )
 
 ##
+blockchain.get_difficulty = ((cb) ->
+  await @get_last_block defer e,last
+  if e then return cb e
+
+  difficulty = (last.difficulty ? env.DIFFICULTY_START)
+
+  # adjust difficulty based on last block's solve-time
+  if last.index % env.DIFFICULTY_START and last.index isnt 0
+    log 'Calculating new difficulty'
+
+    last_adjustment_index = (last.index + 1 - env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS)
+
+    await @get_block last_adjustment_index, defer e,last_adjustment_block
+    if e then return cb e
+
+    if !last_adjustment_block
+      return cb null, difficulty
+
+    difficulty = last_adjustment_block.diff
+
+    secs_expected = (env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS * env.DIFFICULTY_SOLVE_INTERVAL_SECS)
+    secs_elapsed = (last.ctime - last_adjustment_block.ctime)
+
+    log /adjustment parameters/, {expected:seconds_expected,elapsed:seconds_elapsed}
+
+    if secs_elapsed < (secs_expected / 2)
+      log 'Increasing difficulty by 1', (difficulty + 1)
+      difficulty += 1
+
+    else if secs_elapsed > (secs_expected * 2)
+      log 'Reducing difficulty by 1', (difficulty - 1)
+      difficulty -= 1
+    else
+      log 'Keeping the same difficulty level for now', difficulty
+
+  return cb null, difficulty
+)
+
+##
 module.exports = blockchain
 
 ## test

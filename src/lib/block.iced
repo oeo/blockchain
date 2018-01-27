@@ -16,7 +16,10 @@ Schema = new mongoose.Schema({
   prev: String
 
   # pow
-  diff: Number
+  diff: {
+    type: Number
+    default: env.BLOCK_DIFFICULTY_START
+  }
   work: Number
 
   # txns
@@ -46,6 +49,8 @@ Schema.methods.is_valid_schema = (->
     ctime: 'number'
     hash: 'string'
     prev: 'string'
+    diff: 'number'
+    work: 'number'
     data: 'object'
   }
 
@@ -65,11 +70,18 @@ Schema.statics.is_valid_schema = ((block_obj) ->
     hash: 'string'
     prev: 'string'
     data: 'object'
+    work: 'number'
+    data: 'object'
   }
 
   # ignore `prev` on the genesis block
   if block_obj.index is 0 and block_obj.hash is hash.auto(env.GENESIS_HASH_STRING)
-    delete props.prev
+    for key in [
+      'prev'
+      'work'
+      'data'
+    ]
+      delete props[key]
 
   for k,v of props
     return false if !block_obj[k]?
