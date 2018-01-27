@@ -4,6 +4,7 @@ _ = require('wegweg')({
 
 Websocket = require 'ws'
 
+Block = require './block'
 blockchain = require './blockchain'
 
 peers = {
@@ -50,6 +51,11 @@ peers.handlers = handlers = {
     # bind handlers
     @errors(socket)
     @messages(socket)
+
+    # ask peer for the latest block
+    peers.send(socket,{
+      type: MESSAGES.QUERY_LAST
+    })
   )
 
   messages: ((socket) ->
@@ -98,20 +104,26 @@ peers.handlers = handlers = {
   )
 
   errors: ((socket) ->
-    _close = ((me) ->
+    _close = ((x) ->
       log 'Websocket client closed'
-      peers.sockets.splice(peers.sockets.indexOf(me),1)
+      peers.sockets.splice(peers.sockets.indexOf(x),1)
     )
 
     socket.on 'close', -> _close(socket)
     socket.on 'error', -> _close(socket)
   )
 
-  # sync with peers
+  # sync blockchain
   incoming_blocks: ((incoming_blocks) ->
+    log /incoming_blocks_type/, (typeof incoming_block)
+
     log 'Handling incoming blocks from a peer', incoming_blocks.length
 
     last_incoming_block = _.last(incoming_blocks)
+
+    if !Block.is_valid_structure(last_incoming_block)
+      log new Error 'Incoming block had an invalid structure', last_incoming_block
+      return false
 
     await blockchain.get_last_block defer e,last_existing_block
     if e then throw e
