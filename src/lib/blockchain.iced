@@ -46,6 +46,18 @@ blockchain.get_last_block = ((cb) ->
   return cb null, _.last(@blocks)
 )
 
+blockchain.add_block = ((block,cb) ->
+  await @is_valid_next_block block, null, defer e,valid
+  if e then return cb e
+
+  if !valid
+    return cb new Error 'Block is invalid'
+
+  @blocks.push(new_block = new Block(block))
+
+  return cb null, new_block
+)
+
 ##
 blockchain.is_valid_next_block = ((block,prev_block,cb) ->
   if !Block.is_valid_structure(block)
@@ -109,18 +121,6 @@ blockchain.generate_next_block = ((data,cb) ->
   return cb null, block
 )
 
-blockchain.add_block = ((block,cb) ->
-  await @is_valid_next_block block, null, defer e,valid
-  if e then return cb e
-
-  if !valid
-    return cb new Error 'Block is invalid'
-
-  @blocks.push(new_block = new Block(block))
-
-  return cb null, new_block
-)
-
 blockchain.replace_chain = ((new_chain,cb) ->
   await @get_blockchain defer e,cur_chain
   if e then return cb e
@@ -142,9 +142,10 @@ module.exports = blockchain
 if !module.parent
   log /TEST/
 
-  await blockchain.generate_next_block 'Hello', defer e,r
+  await blockchain.generate_next_block 'Hello', defer e,next_block
   if e then throw e
-  log r
+
+  log /next_block/, next_block
 
   exit 0
 

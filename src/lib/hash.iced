@@ -4,6 +4,7 @@ _ = require('wegweg')({
 
 crypto = require 'crypto'
 
+# @todo: cryptonite-lite
 module.exports = hash = {
 
   # use env algo
@@ -14,14 +15,15 @@ module.exports = hash = {
     return this[algo](x...)
   )
 
-  md5: ((x) ->
-    x = JSON.stringify(x) if typeof x isnt 'string'
-    return _.md5(x)
-  )
-
   sha256: ((x) ->
     x = JSON.stringify(x) if typeof x isnt 'string'
     return crypto.createHash('sha256').update(x).digest('hex')
+  )
+
+  # lel
+  md5: ((x) ->
+    x = JSON.stringify(x) if typeof x isnt 'string'
+    return _.md5(x)
   )
 
 }
