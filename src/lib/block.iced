@@ -8,17 +8,22 @@ hash = require './hash'
 
 # entity
 Schema = new mongoose.Schema({
-
   index: Number
   ctime: Number
 
+  # hash
   hash: String
   prev_hash: String
 
+  # txns
   data: {
     type: mongoose.Schema.Types.Mixed
     default: null
   }
+
+  # pow
+  difficulty: Number
+  proof: Number
 
 },{_id:false})
 
