@@ -15,9 +15,7 @@ Schema = new mongoose.Schema({
   hash: String
   prev_hash: String
 
-  data: [
-    mongoose.Schema.Types.Mixed
-  ]
+  data: mongoose.Schema.Types.Mixed
 
 },{_id:false})
 
@@ -45,7 +43,8 @@ Schema.methods.is_valid_structure = (->
 
   for k,v of props
     return false if !this[k]
-    return false if typeof this[k] isnt v
+    if v
+      return false if typeof this[k] isnt v
 
   return true
 )

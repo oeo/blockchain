@@ -1,10 +1,15 @@
+if !module.parent
+  global.CONFIG = (require('dotenv').config({
+    path: __dirname + '/../../config'
+  })).parsed
+
 _ = require('wegweg')({
   globals: on
 })
 
-hash = require './hash'
-
 Block = require './block'
+
+hash = require './hash'
 
 GENESIS = new Block({
   index: 0
@@ -20,7 +25,7 @@ blockchain = {
   blocks: [GENESIS]
 }
 
-##
+## @todo: redis persistence
 blockchain.get_blockchain = ((cb) ->
   return cb null, @blocks
 )
@@ -28,6 +33,13 @@ blockchain.get_blockchain = ((cb) ->
 blockchain.set_blockchain = ((chain,cb) ->
   @blocks = chain
   return cb null, true
+)
+
+blockchain.get_block = ((index_or_hash,cb) ->
+  if !(block = _.find(@blocks,{index:(+index_or_hash)}))
+    block = _.find(@blocks,{hash:index_or_hash})
+
+  return cb null, block
 )
 
 blockchain.get_last_block = ((cb) ->
@@ -79,6 +91,20 @@ blockchain.is_valid_chain = ((chain,cb) ->
   return cb null, true
 )
 
+blockchain.generate_next_block = ((data,cb) ->
+  await @get_last_block defer e,last
+  if e then return cb e
+
+  block = new Block({
+    index: (last.index + 1)
+    ctime: _.time()
+    prev_hash: last.hash
+    data: data
+  })
+
+  return cb null, block
+)
+
 blockchain.replace_chain = ((new_chain,cb) ->
   await @get_blockchain defer e,cur_chain
   if e then return cb e
@@ -99,5 +125,10 @@ module.exports = blockchain
 ## test
 if !module.parent
   log /TEST/
+
+  await blockchain.generate_next_block 'Hello', defer e,r
+  if e then throw e
+  log r
+
   exit 0
 
