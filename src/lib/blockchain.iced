@@ -18,7 +18,7 @@ GENESIS = new Block({
   hash: hash.auto(env.GENESIS_HASH_STRING)
   prev_hash: null
 
-  data: []
+  data: env.GENESIS_HASH_STRING
 })
 
 blockchain = {

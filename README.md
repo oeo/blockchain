@@ -14,7 +14,7 @@
 
 ### optimizations
 - websocket p2p sync
-  - websocket send entire chain to peer only (instead of broadcast)
+  x - websocket send chain to peer only (instead of broadcast)
   - allow transport of partial chain instead of entire chain during sync
     - chain offset query support
 

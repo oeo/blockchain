@@ -23,6 +23,28 @@ peers.send = ((socket,msg) ->
   log 'Sending a message to a peer', msg
   return socket.send(JSON.stringify(msg))
 )
+peers.send_last_block = ((socket) ->
+  log 'peers.send_last_block()'
+
+  await blockchain.get_last_block defer e,block
+  if e then throw e
+
+  return @send(socket,{
+    type: MESSAGES.RESPONSE_BLOCKS
+    data: [block]
+  })
+)
+peers.send_all_blocks = ((socket) ->
+  log 'peers.send_all_blocks()'
+
+  await blockchain.get_blockchain defer e,chain
+  if e then throw e
+
+  return @send(socket,{
+    type: MESSAGES.RESPONSE_BLOCKS
+    data: chain
+  })
+)
 peers.broadcast = ((msg) ->
   for socket in peers.sockets
     socket.send(JSON.stringify(msg))
@@ -88,7 +110,8 @@ peers.handlers = handlers = {
         # QUERY_ALL:
         # return the entire blockchain on this node
         when MESSAGES.QUERY_ALL
-          peers.broadcast_all_blocks()
+          #peers.broadcast_all_blocks()
+          peers.send_all_blocks(socket)
 
         # RESPONSE_BLOCKS:
         # this is a response filled with blockchain data
@@ -157,7 +180,7 @@ peers.ws.on 'connection', (socket...) -> handlers.connections(socket...)
 
 # connect to a peer
 peers.connect = ((ip) ->
-  log 'Connecting to a peer', ip
+  log 'peers.connect()', ip
   peer_ws = new Websocket("ws://#{ip}")
 
   peer_ws.on 'open', -> handlers.connections(peer_ws)
