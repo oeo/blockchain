@@ -124,7 +124,6 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
   if block.ctime < (prev_block.ctime - 60)
     log new Error 'Invalid block (`ctime` before previous block)'
     return cb null, false
-
   if block.ctime > (_.time() + 60)
     log new Error 'Invalid block (`ctime` too far in the future)'
     return cb null, false
