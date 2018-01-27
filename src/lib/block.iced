@@ -76,14 +76,14 @@ if !module.parent
   })
 
   log /valid block/, b
-  log b.is_valid_structure()
+  log /is_valid_structure/, b.is_valid_structure()
 
   b2 = new Block({
     index: 'a'
   })
 
   log /invalid block/, b2
-  log b.is_valid_structure()
+  log /is_valid_structure/, b.is_valid_structure()
 
   exit 0
 
