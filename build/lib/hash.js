@@ -30,6 +30,38 @@
         x = JSON.stringify(x);
       }
       return _.md5(x);
+    }),
+    _hex_to_binary: (function(x) {
+      var i, map, str;
+      str = '';
+      map = {
+        '0': '0000',
+        '1': '0001',
+        '2': '0010',
+        '3': '0011',
+        '4': '0100',
+        '5': '0101',
+        '6': '0110',
+        '7': '0111',
+        '8': '1000',
+        '9': '1001',
+        'a': '1010',
+        'b': '1011',
+        'c': '1100',
+        'd': '1101',
+        'e': '1110',
+        'f': '1111'
+      };
+      i = 0;
+      while (i < x.length) {
+        if (map[x[i]]) {
+          str += map[x[i]];
+        } else {
+          return null;
+        }
+        i += 1;
+      }
+      return str;
     })
   };
 
@@ -38,6 +70,7 @@
     log(hash.sha256({
       hello: 1
     }));
+    log(hash._hex_to_binary('0000000000000000001dea4ec410fad05526369a3ae077945dbd2d9d97c1bb1a'));
   }
 
 }).call(this);

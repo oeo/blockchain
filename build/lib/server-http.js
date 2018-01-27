@@ -83,8 +83,8 @@
         }
         return res.json({
           height: block.index,
-          last_block: block,
-          uptime: Math.round((new Date - PROCESS_STARTED) / 1000)
+          difficulty: block.difficulty,
+          last_block: block
         });
       };
     })(this));
@@ -155,39 +155,6 @@
     })(this));
   }));
 
-  app.get('/blocks-mine', (function(req, res, next) {
-    var e, next_block, ___iced_passed_deferral, __iced_deferrals, __iced_k;
-    __iced_k = __iced_k_noop;
-    ___iced_passed_deferral = iced.findDeferral(arguments);
-    (function(_this) {
-      return (function(__iced_k) {
-        __iced_deferrals = new iced.Deferrals(__iced_k, {
-          parent: ___iced_passed_deferral,
-          filename: "/Users/tky/www/blockchain/src/lib/server-http.iced"
-        });
-        blockchain.generate_next_block({
-          test: 1
-        }, __iced_deferrals.defer({
-          assign_fn: (function() {
-            return function() {
-              e = arguments[0];
-              return next_block = arguments[1];
-            };
-          })(),
-          lineno: 39
-        }));
-        __iced_deferrals._fulfill();
-      });
-    })(this)((function(_this) {
-      return function() {
-        if (e) {
-          return next(e);
-        }
-        return res.json(next_block);
-      };
-    })(this));
-  }));
-
   app.get('/peers', (function(req, res, next) {
     return res.json(true);
   }));
@@ -197,7 +164,7 @@
     return res.json(true);
   }));
 
-  app.get('/dev/incr', (function(req, res, next) {
+  app.get('/_/mine', (function(req, res, next) {
     var e, next_block, ___iced_passed_deferral, __iced_deferrals, __iced_k;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -216,7 +183,7 @@
               return next_block = arguments[1];
             };
           })(),
-          lineno: 57
+          lineno: 50
         }));
         __iced_deferrals._fulfill();
       });
@@ -236,7 +203,7 @@
                 return e = arguments[0];
               };
             })(),
-            lineno: 60
+            lineno: 53
           }));
           __iced_deferrals._fulfill();
         })(function() {

@@ -72,6 +72,76 @@
     return socket.send(JSON.stringify(msg));
   });
 
+  peers.send_last_block = (function(socket) {
+    var block, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    log('peers.send_last_block()');
+    (function(_this) {
+      return (function(__iced_k) {
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "/Users/tky/www/blockchain/src/lib/peers.iced"
+        });
+        blockchain.get_last_block(__iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              e = arguments[0];
+              return block = arguments[1];
+            };
+          })(),
+          lineno: 28
+        }));
+        __iced_deferrals._fulfill();
+      });
+    })(this)((function(_this) {
+      return function() {
+        if (e) {
+          throw e;
+        }
+        return _this.send(socket, {
+          type: MESSAGES.RESPONSE_BLOCKS,
+          data: [block]
+        });
+      };
+    })(this));
+  });
+
+  peers.send_all_blocks = (function(socket) {
+    var chain, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    log('peers.send_all_blocks()');
+    (function(_this) {
+      return (function(__iced_k) {
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "/Users/tky/www/blockchain/src/lib/peers.iced"
+        });
+        blockchain.get_blockchain(__iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              e = arguments[0];
+              return chain = arguments[1];
+            };
+          })(),
+          lineno: 39
+        }));
+        __iced_deferrals._fulfill();
+      });
+    })(this)((function(_this) {
+      return function() {
+        if (e) {
+          throw e;
+        }
+        return _this.send(socket, {
+          type: MESSAGES.RESPONSE_BLOCKS,
+          data: chain
+        });
+      };
+    })(this));
+  });
+
   peers.broadcast = (function(msg) {
     var socket, _i, _len, _ref, _results;
     _ref = peers.sockets;
@@ -101,7 +171,7 @@
               return block = arguments[1];
             };
           })(),
-          lineno: 32
+          lineno: 54
         }));
         __iced_deferrals._fulfill();
       });
@@ -136,7 +206,7 @@
               return chain = arguments[1];
             };
           })(),
-          lineno: 43
+          lineno: 65
         }));
         __iced_deferrals._fulfill();
       });
@@ -165,9 +235,13 @@
     }),
     messages: (function(socket) {
       return socket.on('message', (function(msg) {
-        var _ref;
-        log('Handling message', msg);
-        msg = JSON.parse(msg);
+        var e, _ref;
+        try {
+          msg = JSON.parse(msg);
+        } catch (_error) {
+          e = _error;
+          return false;
+        }
         if ((msg != null ? msg.type : void 0) == null) {
           return false;
         }
@@ -179,7 +253,7 @@
             peers.broadcast_last_block();
             break;
           case MESSAGES.QUERY_ALL:
-            peers.broadcast_all_blocks();
+            peers.send_all_blocks(socket);
             break;
           case MESSAGES.RESPONSE_BLOCKS:
             handlers.incoming_blocks(msg.data);
@@ -220,7 +294,7 @@
                 return last_existing_block = arguments[1];
               };
             })(),
-            lineno: 120
+            lineno: 145
           }));
           __iced_deferrals._fulfill();
         });
@@ -229,12 +303,11 @@
           if (e) {
             throw e;
           }
-          if (last_existing_block.index >= last_incoming_block.index) {
+          if (last_existing_block.hash === last_incoming_block.hash) {
             log('We are current with the incoming chain data', last_existing_block);
             return false;
           }
-          log('Incoming chain is longer', last_incoming_block);
-          if (last_incoming_block.prev_hash === last_existing_block.hash) {
+          if (last_incoming_block.prev === last_existing_block.hash) {
             log('Adding a new block to chain from a peer', last_incoming_block);
             (function(__iced_k) {
               __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -248,7 +321,7 @@
                     return block = arguments[1];
                   };
                 })(),
-                lineno: 133
+                lineno: 156
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -264,7 +337,6 @@
                   type: MESSAGES.QUERY_ALL
                 }));
               } else {
-                log('Replacing our outdated chain with incoming one', incoming_blocks.length);
                 (function(__iced_k) {
                   __iced_deferrals = new iced.Deferrals(__iced_k, {
                     parent: ___iced_passed_deferral,
@@ -276,7 +348,7 @@
                         return e = arguments[0];
                       };
                     })(),
-                    lineno: 147
+                    lineno: 168
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -305,7 +377,7 @@
 
   peers.connect = (function(ip) {
     var peer_ws;
-    log('Connecting to a peer', ip);
+    log('peers.connect()', ip);
     peer_ws = new Websocket("ws://" + ip);
     peer_ws.on('open', function() {
       return handlers.connections(peer_ws);

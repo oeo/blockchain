@@ -59,16 +59,15 @@
 
   hash = require('./hash');
 
-  GENESIS = new Block({
+  GENESIS = {
     index: 0,
     ctime: 1517012327,
     hash: hash.auto(env.GENESIS_HASH_STRING),
-    prev_hash: null,
-    data: []
-  });
+    data: env.GENESIS_HASH_STRING
+  };
 
   blockchain = {
-    blocks: [GENESIS]
+    blocks: [new Block(GENESIS)]
   };
 
   blockchain.get_blockchain = (function(cb) {
@@ -114,7 +113,7 @@
               return valid = arguments[1];
             };
           })(),
-          lineno: 51
+          lineno: 47
         }));
         __iced_deferrals._fulfill();
       });
@@ -134,7 +133,7 @@
   });
 
   blockchain.replace_chain = (function(new_chain, cb) {
-    var e, last_block, valid, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    var e, our_weight, their_weight, valid, ___iced_passed_deferral, __iced_deferrals, __iced_k;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     (function(_this) {
@@ -143,14 +142,14 @@
           parent: ___iced_passed_deferral,
           filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
         });
-        _this.get_last_block(__iced_deferrals.defer({
+        _this.is_valid_chain(new_chain, __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
               e = arguments[0];
-              return last_block = arguments[1];
+              return valid = arguments[1];
             };
           })(),
-          lineno: 64
+          lineno: 62
         }));
         __iced_deferrals._fulfill();
       });
@@ -159,51 +158,76 @@
         if (e) {
           return cb(e);
         }
-        if (last_block.index >= new_chain.length) {
-          return cb(null, false);
+        if (!valid) {
+          return cb(new Error('Received an invalid chain, refusing to `replace_chain`'));
         }
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
             filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
           });
-          _this.is_valid_chain(new_chain, __iced_deferrals.defer({
+          blockchain.calculate_difficulty_weight(null, __iced_deferrals.defer({
             assign_fn: (function() {
               return function() {
                 e = arguments[0];
-                return valid = arguments[1];
+                return our_weight = arguments[1];
               };
             })(),
-            lineno: 70
+            lineno: 69
           }));
           __iced_deferrals._fulfill();
         })(function() {
           if (e) {
             return cb(e);
           }
-          if (!valid) {
-            return cb(new Error('Received an invalid chain, refusing to `replace_chain`'));
-          }
-          log('Replacing our blockchain with a larger chain');
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
               filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
             });
-            _this.set_blockchain(new_chain, __iced_deferrals.defer({
+            blockchain.calculate_difficulty_weight(new_chain, __iced_deferrals.defer({
               assign_fn: (function() {
                 return function() {
-                  return e = arguments[0];
+                  e = arguments[0];
+                  return their_weight = arguments[1];
                 };
               })(),
-              lineno: 78
+              lineno: 72
             }));
             __iced_deferrals._fulfill();
           })(function() {
             if (e) {
               return cb(e);
             }
-            return cb(null, true);
+            (function(__iced_k) {
+              if (their_weight > our_weight) {
+                log('Replacing our blockchain with a larger chain');
+                (function(__iced_k) {
+                  __iced_deferrals = new iced.Deferrals(__iced_k, {
+                    parent: ___iced_passed_deferral,
+                    filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
+                  });
+                  _this.set_blockchain(new_chain, __iced_deferrals.defer({
+                    assign_fn: (function() {
+                      return function() {
+                        return e = arguments[0];
+                      };
+                    })(),
+                    lineno: 78
+                  }));
+                  __iced_deferrals._fulfill();
+                })(function() {
+                  if (e) {
+                    return cb(e);
+                  }
+                  return __iced_k();
+                });
+              } else {
+                return __iced_k();
+              }
+            })(function() {
+              return cb(null, true);
+            });
           });
         });
       };
@@ -211,7 +235,7 @@
   });
 
   blockchain.is_valid_next_block = (function(block, prev_block, cb) {
-    var calced_hash, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    var calced_hash, difficulty, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     if (!Block.is_valid_schema(block)) {
@@ -240,7 +264,31 @@
             if (e) {
               return cb(e);
             }
-            return __iced_k();
+            (function(__iced_k) {
+              __iced_deferrals = new iced.Deferrals(__iced_k, {
+                parent: ___iced_passed_deferral,
+                filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
+              });
+              _this.get_difficulty(__iced_deferrals.defer({
+                assign_fn: (function() {
+                  return function() {
+                    e = arguments[0];
+                    return difficulty = arguments[1];
+                  };
+                })(),
+                lineno: 95
+              }));
+              __iced_deferrals._fulfill();
+            })(function() {
+              if (e) {
+                return cb(e);
+              }
+              if (block.difficulty !== difficulty) {
+                log(new Error('Invalid block (`difficulty`)'));
+                return cb(null, false);
+              }
+              return __iced_k();
+            });
           });
         } else {
           return __iced_k();
@@ -252,12 +300,24 @@
           log(new Error('Invalid block (`index`)'));
           return cb(null, false);
         }
-        if (block.prev_hash !== prev_block.hash) {
-          log(new Error('Invalid block (`prev_hash`)'));
+        if (block.prev !== prev_block.hash) {
+          log(new Error('Invalid block (`prev`)'));
           return cb(null, false);
         }
         if (block.hash !== (calced_hash = Block.calculate_hash(block))) {
           log(new Error('Invalid block (`hash`)'));
+          return cb(null, false);
+        }
+        if (!Block.is_valid_proof(block)) {
+          log(new Error('Invalid block (`proof`)'));
+          return cb(null, false);
+        }
+        if (block.ctime < (prev_block.ctime - 60)) {
+          log(new Error('Invalid block (`ctime` before previous block)'));
+          return cb(null, false);
+        }
+        if (block.ctime > (_.time() + 60)) {
+          log(new Error('Invalid block (`ctime` too far in the future)'));
           return cb(null, false);
         }
         return cb(null, true);
@@ -321,7 +381,7 @@ _continue()
                       return valid = arguments[1];
                     };
                   })(),
-                  lineno: 130
+                  lineno: 152
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -349,7 +409,7 @@ _continue()
   });
 
   blockchain.generate_next_block = (function(data, cb) {
-    var block, e, last, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    var block, block_base, difficulty, e, last, ___iced_passed_deferral, __iced_deferrals, __iced_k;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     (function(_this) {
@@ -365,7 +425,7 @@ _continue()
               return last = arguments[1];
             };
           })(),
-          lineno: 143
+          lineno: 166
         }));
         __iced_deferrals._fulfill();
       });
@@ -374,14 +434,186 @@ _continue()
         if (e) {
           return cb(e);
         }
-        block = new Block({
-          index: last.index + 1,
-          ctime: _.time(),
-          prev_hash: last.hash,
-          data: data
+        (function(__iced_k) {
+          __iced_deferrals = new iced.Deferrals(__iced_k, {
+            parent: ___iced_passed_deferral,
+            filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
+          });
+          _this.get_difficulty(__iced_deferrals.defer({
+            assign_fn: (function() {
+              return function() {
+                e = arguments[0];
+                return difficulty = arguments[1];
+              };
+            })(),
+            lineno: 169
+          }));
+          __iced_deferrals._fulfill();
+        })(function() {
+          if (e) {
+            return cb(e);
+          }
+          block_base = {
+            index: last.index + 1,
+            ctime: _.time(),
+            prev: last.hash,
+            difficulty: difficulty,
+            data: data
+          };
+          (function(__iced_k) {
+            __iced_deferrals = new iced.Deferrals(__iced_k, {
+              parent: ___iced_passed_deferral,
+              filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
+            });
+            blockchain.mine_block(block_base, __iced_deferrals.defer({
+              assign_fn: (function() {
+                return function() {
+                  e = arguments[0];
+                  return block = arguments[1];
+                };
+              })(),
+              lineno: 183
+            }));
+            __iced_deferrals._fulfill();
+          })(function() {
+            if (e) {
+              return cb(e);
+            }
+            return cb(null, block);
+          });
         });
-        block.hash = Block.calculate_hash(block);
+      };
+    })(this));
+  });
+
+  blockchain.mine_block = (function(block, cb) {
+    if (block.proof == null) {
+      block.proof = 0;
+    }
+    block.hash = Block.calculate_hash(block);
+    while (1) {
+      block.hash = Block.calculate_hash(block);
+      if (Block.is_valid_proof(block)) {
         return cb(null, block);
+      } else {
+        block.proof += 1;
+      }
+    }
+    return cb(null, false);
+  });
+
+  blockchain.get_difficulty = (function(cb) {
+    var difficulty, e, last, last_adjustment_block, last_adjustment_index, secs_elapsed, secs_expected, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    (function(_this) {
+      return (function(__iced_k) {
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
+        });
+        _this.get_last_block(__iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              e = arguments[0];
+              return last = arguments[1];
+            };
+          })(),
+          lineno: 205
+        }));
+        __iced_deferrals._fulfill();
+      });
+    })(this)((function(_this) {
+      return function() {
+        var _ref;
+        if (e) {
+          return cb(e);
+        }
+        difficulty = +((_ref = last.difficulty) != null ? _ref : env.DIFFICULTY_LEVEL_START);
+        (function(__iced_k) {
+          if ((last.index % env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS === 0) && last.index !== 0) {
+            last_adjustment_index = last.index + 1 - (+env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS);
+            (function(__iced_k) {
+              __iced_deferrals = new iced.Deferrals(__iced_k, {
+                parent: ___iced_passed_deferral,
+                filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
+              });
+              _this.get_block(last_adjustment_index, __iced_deferrals.defer({
+                assign_fn: (function() {
+                  return function() {
+                    e = arguments[0];
+                    return last_adjustment_block = arguments[1];
+                  };
+                })(),
+                lineno: 214
+              }));
+              __iced_deferrals._fulfill();
+            })(function() {
+              if (e) {
+                return cb(e);
+              }
+              if (!last_adjustment_block) {
+                return cb(null, difficulty);
+              }
+              difficulty = last_adjustment_block.difficulty;
+              secs_expected = +env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS * +env.DIFFICULTY_SOLVE_INTERVAL_SECS;
+              secs_elapsed = last.ctime - last_adjustment_block.ctime;
+              return __iced_k(secs_elapsed < (secs_expected / 2) ? difficulty += 1 : secs_elapsed > (secs_expected * 2) ? difficulty -= 1 : void 0);
+            });
+          } else {
+            return __iced_k();
+          }
+        })(function() {
+          return cb(null, difficulty);
+        });
+      };
+    })(this));
+  });
+
+  blockchain.calculate_difficulty_weight = (function(blocks, cb) {
+    var block, e, weight, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    if (blocks == null) {
+      blocks = null;
+    }
+    (function(_this) {
+      return (function(__iced_k) {
+        if (!blocks) {
+          (function(__iced_k) {
+            __iced_deferrals = new iced.Deferrals(__iced_k, {
+              parent: ___iced_passed_deferral,
+              filename: "/Users/tky/www/blockchain/src/lib/blockchain.iced"
+            });
+            _this.get_blockchain(__iced_deferrals.defer({
+              assign_fn: (function() {
+                return function() {
+                  e = arguments[0];
+                  return blocks = arguments[1];
+                };
+              })(),
+              lineno: 237
+            }));
+            __iced_deferrals._fulfill();
+          })(function() {
+            if (e) {
+              return cb(e);
+            }
+            return __iced_k();
+          });
+        } else {
+          return __iced_k();
+        }
+      });
+    })(this)((function(_this) {
+      return function() {
+        var _i, _len, _ref;
+        weight = 0;
+        for (_i = 0, _len = blocks.length; _i < _len; _i++) {
+          block = blocks[_i];
+          weight += Math.pow(2, (_ref = block.difficulty) != null ? _ref : 0);
+        }
+        return cb(null, weight);
       };
     })(this));
   });
@@ -402,7 +634,7 @@ _continue()
               return next_block = arguments[1];
             };
           })(),
-          lineno: 165
+          lineno: 255
         }));
         __iced_deferrals._fulfill();
       });
