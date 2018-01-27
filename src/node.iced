@@ -14,9 +14,9 @@ _ = require('wegweg')({
 log _.reads(ascii) if _.exists(ascii = __dirname + '/../ascii.art')
 log CONFIG
 
+peers = require './lib/peers'
+peers.server.listen(env.WEBSOCKET_PORT)
+
 http_server = require './lib/server-http'
 http_server.listen(CONFIG.HTTP_PORT)
-
-websocket = require './lib/server-peers'
-websocket.server.listen(env.WEBSOCKET_PORT)
 

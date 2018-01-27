@@ -35,7 +35,7 @@ app.get '/blocks/:index_or_hash', ((req,res,next) ->
   return res.json block
 )
 
-app.post '/blocks/add', ((req,res,next) ->
+app.post '/blocks-add', ((req,res,next) ->
   return res.json todo:_.time()
 )
 
@@ -44,7 +44,7 @@ app.get '/peers', ((req,res,next) ->
   return res.json todo:_.time()
 )
 
-app.post '/peers/add', ((req,res,next) ->
+app.post '/peers-add', ((req,res,next) ->
   return res.json todo:_.time()
 )
 
