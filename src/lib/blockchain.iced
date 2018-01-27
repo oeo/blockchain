@@ -32,6 +32,8 @@ blockchain.get_blockchain = ((cb) ->
 
 blockchain.set_blockchain = ((chain,cb) ->
   @blocks = chain
+  require('./peers').broadcast_last_block()
+
   return cb null, true
 )
 
@@ -51,11 +53,33 @@ blockchain.add_block = ((block,cb) ->
   if e then return cb e
 
   if !valid
-    return cb new Error 'Block is invalid' if !valid
+    return cb new Error 'Block is invalid'
 
-  @blocks.push(new_block = new Block(block))
+  @blocks.push new Block(block)
+  require('./peers').broadcast_last_block()
 
-  return cb null, new_block
+  return cb null, true
+)
+
+blockchain.replace_chain = ((new_chain,cb) ->
+  await @get_last_block defer e,last_block
+  if e then return cb e
+
+  if last_block.index >= new_chain.length
+    return cb null, false
+
+  await @is_valid_chain new_chain, defer e,valid
+  if e then return cb e
+
+  if !valid
+    return cb new Error 'Received an invalid chain, refusing to `replace_chain`'
+
+  log 'Replacing our blockchain with a larger chain'
+
+  await @set_blockchain new_chain, defer e
+  if e then return cb e
+
+  return cb null, true
 )
 
 ##
@@ -65,18 +89,21 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
     return cb null, false
 
   if !prev_block
-    await @get_last_block defer e,last
+    await @get_last_block defer e,prev_block
     if e then return cb e
 
-  if block.index isnt (last.index + 1)
-    log new Error 'Invalid block ID'
+  # validate id
+  if block.index isnt (prev_block.index + 1)
+    log new Error 'Invalid block index'
     return cb null, false
 
-  if block.prev_hash isnt last.hash
+  # validate prev_hash
+  if block.prev_hash isnt prev_block.hash
     log new Error 'Invalid previous block hash'
     return cb null, false
 
-  if block.hash isnt Block.calculate_hash(block)
+  # validate hash
+  if block.hash isnt (calced_hash = Block.calculate_hash(block))
     log new Error 'Invalid block hash'
     return cb null, false
 
@@ -84,25 +111,29 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
 )
 
 blockchain.is_valid_chain = ((chain,cb) ->
-  chain_genesis = chain.shift()
 
-  if chain_genesis.hash isnt GENESIS_BLOCK.hash
-    log new Error 'Invalid genesis block'
-    return false
+  # validate genesis block
+  chain_genesis = chain[0]
 
-  i = 1
+  for key in ['index','hash','ctime']
+    if chain_genesis[key] isnt GENESIS[key]
+      log new Error 'Invalid genesis block'
+      return cb null, false
 
-  for block in chain
-    prev_block = block[i - 1]
+  # iterate the chain
+  i = 0; for block in chain
+    if i is 0
+      i += 1
+      continue
 
-    await @is_valid_next_block block, prev_block, defer e,valid
+    await @is_valid_next_block block, chain[i - 1], defer e,valid
     if e then return cb e
 
     if !valid
       log new Error 'Invalid block in chain', block.index
-      return false
-
-    i += 1
+      return cb null, false
+    else
+      i += 1
 
   return cb null, true
 )
@@ -118,21 +149,9 @@ blockchain.generate_next_block = ((data,cb) ->
     data: data
   })
 
+  block.hash = Block.calculate_hash(block)
+
   return cb null, block
-)
-
-blockchain.replace_chain = ((new_chain,cb) ->
-  await @get_blockchain defer e,cur_chain
-  if e then return cb e
-
-  if new_chain.length > cur_chain.length
-    await @is_valid_chain new_chain, defer e,valid
-    if e then return cb e
-
-    if valid
-      log 'Received blockchain is valid and longer than existing chain, replacing our chain'
-
-  return cb null, true
 )
 
 ##

@@ -36,8 +36,11 @@ app.get '/blocks/:index_or_hash', ((req,res,next) ->
   return res.json block
 )
 
-app.get '/blocks-add', ((req,res,next) ->
-  return res.json todo:_.time()
+app.get '/blocks-mine', ((req,res,next) ->
+  await blockchain.generate_next_block {test:1}, defer e,next_block
+  if e then return next e
+
+  return res.json next_block
 )
 
 # peers
@@ -48,6 +51,17 @@ app.get '/peers', ((req,res,next) ->
 app.get '/peers-add', ((req,res,next) ->
   peers.connect(req.query.ip)
   return res.json true
+)
+
+# devel
+app.get '/dev/incr', ((req,res,next) ->
+  await blockchain.generate_next_block {test:1}, defer e,next_block
+  if e then return next e
+
+  await blockchain.add_block next_block, defer e
+  if e then return next e
+
+  return res.json(next_block)
 )
 
 ##

@@ -25,12 +25,12 @@ peers.send = ((socket,msg) ->
 )
 
 peers.broadcast = ((msg) ->
-  log 'Broadcasting message to peers', {peers:(peers.sockets?.length ? 0),msg:msg}
-  return socket.send(JSON.stringify(msg)) for socket in peers.sockets
+  for socket in peers.sockets
+    socket.send(JSON.stringify(msg))
 )
 
 peers.broadcast_last_block = (->
-  log 'Broadcasting latest block to the network'
+  log 'peers.broadcast_last_block()'
 
   await blockchain.get_last_block defer e,block
   if e then throw e
@@ -63,8 +63,8 @@ peers.handlers = handlers = {
       log 'Handling message', msg
       msg = JSON.parse(msg)
 
-      return null if !msg?.type?
-      return null if msg.type !in _.vals(MESSAGES)
+      return false if !msg?.type?
+      return false if msg.type !in _.vals(MESSAGES)
 
       #
       # MESSAGE HANDLERS
@@ -118,13 +118,10 @@ peers.handlers = handlers = {
 
   # sync blockchain
   incoming_blocks: ((incoming_blocks) ->
-    log /incoming_blocks_type/, (typeof incoming_blocks)
-
     log 'Handling incoming blocks from a peer', incoming_blocks.length
 
+    first_incoming_block = _.first(incoming_blocks)
     last_incoming_block = _.last(incoming_blocks)
-
-    log /last_incoming_block/, last_incoming_block
 
     await blockchain.get_last_block defer e,last_existing_block
     if e then throw e
@@ -133,7 +130,7 @@ peers.handlers = handlers = {
       log 'We are current with the incoming chain data', last_existing_block
       return false
 
-    log 'Incoming chain is longer', last_existing_block, last_incoming_block
+    log 'Incoming chain is longer', last_incoming_block
 
     # we're behind by a single block
     if last_incoming_block.prev_hash is last_existing_block.hash
@@ -142,20 +139,12 @@ peers.handlers = handlers = {
       await blockchain.add_block last_incoming_block, defer e,block
       if e then throw e
 
-      # broadcast latest
-      return peers.broadcast({
-        type: MESSAGES.RESPONSE_BLOCKS
-        data: [block]
-      })
-
     # we're behind by multiple blocks
     else
 
       # response only contained a single block, ask for the entire chain
       if incoming_blocks?.length is 1
-        return peers.broadcast({
-          type: MESSAGES.QUERY_ALL
-        })
+        peers.broadcast({type:MESSAGES.QUERY_ALL})
 
       # response contained multiple blocks, replace our chain
       else
@@ -163,14 +152,6 @@ peers.handlers = handlers = {
 
         await blockchain.replace_chain incoming_blocks, defer e
         if e then throw e
-
-        # broadcast latest
-        return peers.broadcast({
-          type: MESSAGES.RESPONSE_BLOCKS
-          data: [_.last(incoming_blocks)]
-        })
-
-    return false
   )
 
 }

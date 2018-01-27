@@ -24,12 +24,12 @@ Schema = new mongoose.Schema({
 
 # calc hash on create
 Schema.path('index').set((x)->
-  @hash ?= hash.sha256([
+  @hash ?= (hash.sha256([
     @index
     @ctime
-    @prev_hash
-    JSON.stringify(@data)
-  ].join(''))
+    (@prev_hash ? null)
+    JSON.stringify(@data ? {})
+  ].join('')))
 
   return x
 )
@@ -62,15 +62,13 @@ Schema.statics.is_valid_structure = ((block_obj) ->
     data: 'object'
   }
 
-  log /block_obj/, block_obj
+  # ignore `prev_hash` on the genesis block
+  if block_obj.index is 0
+    delete props.prev_hash
 
   for k,v of props
-    if !block_obj[k]?
-      log /missing_property/, {key:k}
     return false if !block_obj[k]?
     if v
-      if typeof block_obj[k] isnt v
-        log /unexpected_property_type/, {expected:v,got:typeof block_obj[k],key:k}
       return false if typeof block_obj[k] isnt v
 
   return true
@@ -81,7 +79,7 @@ Schema.statics.calculate_hash = ((block_obj) ->
     block_obj.index
     block_obj.ctime
     block_obj.prev_hash
-    JSON.stringify(block_obj.data)
+    JSON.stringify(block_obj.data ? {})
   ].join(''))
 )
 
