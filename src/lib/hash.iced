@@ -18,6 +18,7 @@ module.exports = hash = {
     x = JSON.stringify(x) if typeof x isnt 'string'
     return _.md5(x)
   )
+
   sha256: ((x) ->
     x = JSON.stringify(x) if typeof x isnt 'string'
     return crypto.createHash('sha256').update(x).digest('hex')
