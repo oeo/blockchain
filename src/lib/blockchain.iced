@@ -2,22 +2,22 @@ _ = require('wegweg')({
   globals: on
 })
 
-log /process.env/, env
-
 hash = require './hash'
 
 Block = require './block'
 
+GENESIS = new Block({
+  index: 0
+  ctime: 1517012327
+
+  hash: hash.sha256(env.GENESIS_HASH_STRING)
+  prev_hash: null
+
+  data: []
+})
+
 blockchain = {
-  blocks: [GENESIS_BLOCK = new Block({
-    index: 0
-    ctime: 1517012327
-
-    hash: hash.sha256('helo')
-    prev_hash: null
-
-    data: []
-  })]
+  blocks: [GENESIS]
 }
 
 ##
