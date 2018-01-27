@@ -6,13 +6,13 @@ Websocket = require 'ws'
 
 blockchain = require './blockchain'
 
-# primary export
+app = _.app(bare:true)
+
 websocket = {
+  server: (new Websocket.Server({port:env.WEBSOCKET_PORT}))
   sockets: []
 }
 
 ##
 module.exports = websocket
-
-
 

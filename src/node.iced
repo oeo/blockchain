@@ -16,6 +16,6 @@ blockchain = require './lib/blockchain'
 http_server = require './lib/server-http'
 http_server.listen(CONFIG.HTTP_PORT)
 
-websocket_server = require './lib/server-websocket'
-#websocket_server.listen(env.WEBSOCKET_PORT)
+websocket = require './lib/server-websocket'
+#websocket.listen(env.WEBSOCKET_PORT)
 
