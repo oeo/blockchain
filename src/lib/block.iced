@@ -15,7 +15,10 @@ Schema = new mongoose.Schema({
   hash: String
   prev_hash: String
 
-  data: mongoose.Schema.Types.Mixed
+  data: {
+    type: mongoose.Schema.Types.Mixed
+    default: null
+  }
 
 },{_id:false})
 
@@ -38,7 +41,9 @@ Schema.methods.is_valid_structure = (->
     ctime: 'number'
     hash: 'string'
     prev_hash: 'string'
-    data: 'object'
+
+    #data: 'object'
+    data: null
   }
 
   for k,v of props
@@ -50,6 +55,25 @@ Schema.methods.is_valid_structure = (->
 )
 
 # statics
+Schema.statics.is_valid_structure = ((block_obj) ->
+  props = {
+    index: 'number'
+    ctime: 'number'
+    hash: 'string'
+    prev_hash: 'string'
+
+    #data: 'object'
+    data: null
+  }
+
+  for k,v of props
+    return false if !block_obj[k]
+    if v
+      return false if typeof block_obj[k] isnt v
+
+  return true
+)
+
 Schema.statics.calculate_hash = ((block_obj) ->
   return hash.sha256([
     block_obj.index

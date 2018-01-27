@@ -48,6 +48,10 @@ blockchain.get_last_block = ((cb) ->
 
 ##
 blockchain.is_valid_next_block = ((block,prev_block,cb) ->
+  if !Block.is_valid_structure(block)
+    log new Error 'Invalid block structure'
+    return cb null, false
+
   if !prev_block
     await @get_last_block defer e,last
     if e then return cb e
@@ -103,6 +107,18 @@ blockchain.generate_next_block = ((data,cb) ->
   })
 
   return cb null, block
+)
+
+blockchain.add_block = ((block,cb) ->
+  await @is_valid_next_block block, null, defer e,valid
+  if e then return cb e
+
+  if !valid
+    return cb new Error 'Block is invalid'
+
+  @blocks.push(new_block = new Block(block))
+
+  return cb null, new_block
 )
 
 blockchain.replace_chain = ((new_chain,cb) ->
