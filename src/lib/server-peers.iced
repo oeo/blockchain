@@ -134,20 +134,20 @@ peers.handlers = handlers = {
 
     log 'Incoming chain is longer', last_existing_block, last_incoming_block
 
-    # behind by a single block
+    # we're behind by a single block
     if last_incoming_block.prev_hash is last_existing_block.hash
       log 'Adding a new block to chain from a peer', last_incoming_block
 
       await blockchain.add_block last_incoming_black, defer e,block
       if e then throw e
 
-      # broadcast last block
+      # broadcast latest
       return peers.broadcast({
         type: MESSAGES.BLOCKCHAIN_RESPONSE
         data: [block]
       })
 
-    # behind by multiple blocks
+    # we're behind by multiple blocks
     else
 
       # response only contained a single block, ask for the entire chain
@@ -156,15 +156,20 @@ peers.handlers = handlers = {
           type: MESSAGES.QUERY_ALL
         })
 
-      # response contained all blocks, replace our blocks
+      # response contained multiple blocks, replace our chain
       else
         log 'Replacing our outdated chain with incoming one', incoming_blocks.length
 
         await blockchain.replace_chain incoming_blocks, defer e
         if e then throw e
 
-    #
-    return true
+        # broadcast latest
+        return peers.broadcast({
+          type: MESSAGES.BLOCKCHAIN_RESPONSE
+          data: [_.last(incoming_blocks)]
+        })
+
+    return false
   )
 
 }
@@ -172,6 +177,15 @@ peers.handlers = handlers = {
 # create server
 peers.ws = new Websocket.Server({server:http_server})
 peers.ws.on 'connection', (socket...) -> handlers.connections(socket...)
+
+# connect to a peer
+peers.connect = ((ip) ->
+  log 'Connecting to a peer', ip
+  peer_ws = new Websocket("ws://#{ip}")
+
+  peer_ws.on 'open', -> peers.handlers.connection(peer_ws)
+  peer_ws.on 'error', -> null
+)
 
 ##
 module.exports = peers
