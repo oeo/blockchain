@@ -101,7 +101,7 @@
               return block = arguments[1];
             };
           })(),
-          lineno: 34
+          lineno: 32
         }));
         __iced_deferrals._fulfill();
       });
@@ -113,6 +113,41 @@
         return _this.broadcast({
           type: MESSAGES.RESPONSE_BLOCKS,
           data: [block]
+        });
+      };
+    })(this));
+  });
+
+  peers.broadcast_all_blocks = (function() {
+    var chain, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    log('peers.broadcast_all_blocks()');
+    (function(_this) {
+      return (function(__iced_k) {
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "/Users/tky/www/blockchain/src/lib/peers.iced"
+        });
+        blockchain.get_blockchain(__iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              e = arguments[0];
+              return chain = arguments[1];
+            };
+          })(),
+          lineno: 43
+        }));
+        __iced_deferrals._fulfill();
+      });
+    })(this)((function(_this) {
+      return function() {
+        if (e) {
+          throw e;
+        }
+        return _this.broadcast({
+          type: MESSAGES.RESPONSE_BLOCKS,
+          data: chain
         });
       };
     })(this));
@@ -130,9 +165,7 @@
     }),
     messages: (function(socket) {
       return socket.on('message', (function(msg) {
-        var block, blocks, e, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref;
-        __iced_k = __iced_k_noop;
-        ___iced_passed_deferral = iced.findDeferral(arguments);
+        var _ref;
         log('Handling message', msg);
         msg = JSON.parse(msg);
         if ((msg != null ? msg.type : void 0) == null) {
@@ -141,84 +174,23 @@
         if (_ref = msg.type, __indexOf.call(_.vals(MESSAGES), _ref) < 0) {
           return false;
         }
-        (function(_this) {
-          return (function(__iced_k) {
-            switch (msg.type) {
-              case MESSAGES.QUERY_LAST:
-                log(/QUERY_LAST/);
-                (function(__iced_k) {
-                  __iced_deferrals = new iced.Deferrals(__iced_k, {
-                    parent: ___iced_passed_deferral,
-                    filename: "/Users/tky/www/blockchain/src/lib/peers.iced"
-                  });
-                  blockchain.get_last_block(__iced_deferrals.defer({
-                    assign_fn: (function() {
-                      return function() {
-                        e = arguments[0];
-                        return block = arguments[1];
-                      };
-                    })(),
-                    lineno: 77
-                  }));
-                  __iced_deferrals._fulfill();
-                })(function() {
-                  if (e) {
-                    throw e;
-                  }
-                  return peers.send(socket, {
-                    type: MESSAGES.RESPONSE_BLOCKS,
-                    data: [block]
-                  });
-                  return __iced_k();
-                });
-                break;
-              case MESSAGES.QUERY_ALL:
-                log(/QUERY_ALL/);
-                (function(__iced_k) {
-                  __iced_deferrals = new iced.Deferrals(__iced_k, {
-                    parent: ___iced_passed_deferral,
-                    filename: "/Users/tky/www/blockchain/src/lib/peers.iced"
-                  });
-                  blockchain.get_blockchain(__iced_deferrals.defer({
-                    assign_fn: (function() {
-                      return function() {
-                        e = arguments[0];
-                        return blocks = arguments[1];
-                      };
-                    })(),
-                    lineno: 89
-                  }));
-                  __iced_deferrals._fulfill();
-                })(function() {
-                  if (e) {
-                    throw e;
-                  }
-                  return peers.send(socket, {
-                    type: MESSAGES.RESPONSE_BLOCKS,
-                    data: blocks
-                  });
-                  return __iced_k();
-                });
-                break;
-              case MESSAGES.RESPONSE_BLOCKS:
-                log(/RESPONSE_BLOCKS/);
-                return handlers.incoming_blocks(msg.data);
-                return __iced_k();
-              default:
-                return __iced_k();
-            }
-          });
-        })(this)((function(_this) {
-          return function() {
-            return false;
-          };
-        })(this));
+        switch (msg.type) {
+          case MESSAGES.QUERY_LAST:
+            peers.broadcast_last_block();
+            break;
+          case MESSAGES.QUERY_ALL:
+            peers.broadcast_all_blocks();
+            break;
+          case MESSAGES.RESPONSE_BLOCKS:
+            handlers.incoming_blocks(msg.data);
+        }
+        return false;
       }));
     }),
     errors: (function(socket) {
       var _close;
       _close = (function(x) {
-        log('Websocket client closed');
+        log('Websocket client disconnected');
         return peers.sockets.splice(peers.sockets.indexOf(x), 1);
       });
       socket.on('close', function() {
@@ -248,7 +220,7 @@
                 return last_existing_block = arguments[1];
               };
             })(),
-            lineno: 125
+            lineno: 120
           }));
           __iced_deferrals._fulfill();
         });
@@ -276,7 +248,7 @@
                     return block = arguments[1];
                   };
                 })(),
-                lineno: 138
+                lineno: 133
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -304,7 +276,7 @@
                         return e = arguments[0];
                       };
                     })(),
-                    lineno: 152
+                    lineno: 147
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {

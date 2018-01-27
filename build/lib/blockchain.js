@@ -62,7 +62,7 @@
   GENESIS = new Block({
     index: 0,
     ctime: 1517012327,
-    hash: hash.sha256(env.GENESIS_HASH_STRING),
+    hash: hash.auto(env.GENESIS_HASH_STRING),
     prev_hash: null,
     data: []
   });
@@ -214,8 +214,8 @@
     var calced_hash, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
-    if (!Block.is_valid_structure(block)) {
-      log(new Error('Invalid block structure'));
+    if (!Block.is_valid_schema(block)) {
+      log(new Error('Invalid block (schema)'));
       return cb(null, false);
     }
     (function(_this) {
@@ -249,15 +249,15 @@
     })(this)((function(_this) {
       return function() {
         if (block.index !== (prev_block.index + 1)) {
-          log(new Error('Invalid block index'));
+          log(new Error('Invalid block (`index`)'));
           return cb(null, false);
         }
         if (block.prev_hash !== prev_block.hash) {
-          log(new Error('Invalid previous block hash'));
+          log(new Error('Invalid block (`prev_hash`)'));
           return cb(null, false);
         }
         if (block.hash !== (calced_hash = Block.calculate_hash(block))) {
-          log(new Error('Invalid block hash'));
+          log(new Error('Invalid block (`hash`)'));
           return cb(null, false);
         }
         return cb(null, true);
@@ -321,7 +321,7 @@ _continue()
                       return valid = arguments[1];
                     };
                   })(),
-                  lineno: 128
+                  lineno: 130
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -365,7 +365,7 @@ _continue()
               return last = arguments[1];
             };
           })(),
-          lineno: 141
+          lineno: 143
         }));
         __iced_deferrals._fulfill();
       });
@@ -402,7 +402,7 @@ _continue()
               return next_block = arguments[1];
             };
           })(),
-          lineno: 163
+          lineno: 165
         }));
         __iced_deferrals._fulfill();
       });

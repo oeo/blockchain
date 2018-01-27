@@ -31,7 +31,7 @@
     return x;
   });
 
-  Schema.methods.is_valid_structure = (function() {
+  Schema.methods.is_valid_schema = (function() {
     var k, props, v;
     props = {
       index: 'number',
@@ -54,7 +54,7 @@
     return true;
   });
 
-  Schema.statics.is_valid_structure = (function(block_obj) {
+  Schema.statics.is_valid_schema = (function(block_obj) {
     var k, props, v;
     props = {
       index: 'number',
@@ -63,7 +63,7 @@
       prev_hash: 'string',
       data: 'object'
     };
-    if (block_obj.index === 0) {
+    if (block_obj.index === 0 && block_obj.hash === hash.auto(env.GENESIS_HASH_STRING)) {
       delete props.prev_hash;
     }
     for (k in props) {

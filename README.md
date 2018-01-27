@@ -4,10 +4,11 @@
 - websocket p2p syncing
 
 # @todo
-- redis persistence
+- pow
 - keypairs/accounts
 - transactions (ledger/memos)
-- peer discovery
+- automatic peer discovery
+- redis persistence
 - blockchain explorer
 - wallet
 
