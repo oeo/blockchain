@@ -3,6 +3,7 @@ _ = require('wegweg')({
 })
 
 blockchain = require './blockchain'
+peers = require './peers'
 
 app = _.app()
 
@@ -35,17 +36,18 @@ app.get '/blocks/:index_or_hash', ((req,res,next) ->
   return res.json block
 )
 
-app.post '/blocks-add', ((req,res,next) ->
+app.get '/blocks-add', ((req,res,next) ->
   return res.json todo:_.time()
 )
 
 # peers
 app.get '/peers', ((req,res,next) ->
-  return res.json todo:_.time()
+  return res.json true
 )
 
-app.post '/peers-add', ((req,res,next) ->
-  return res.json todo:_.time()
+app.get '/peers-add', ((req,res,next) ->
+  peers.connect(req.query.ip)
+  return res.json true
 )
 
 ##

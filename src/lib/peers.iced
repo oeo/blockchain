@@ -45,7 +45,7 @@ peers.broadcast_last_block = (->
 peers.handlers = handlers = {
 
   connections: ((socket,req) ->
-    log 'Handling connection', req.connection.remoteAddress
+    log 'Handling connection'
     peers.sockets.push(socket)
 
     # bind handlers
@@ -74,6 +74,7 @@ peers.handlers = handlers = {
         # QUERY_LAST:
         # return the block height and the last block
         when MESSAGES.QUERY_LAST
+          log /QUERY_LAST/
           await blockchain.get_last_block defer e,block
           if e then throw e
 
@@ -85,6 +86,7 @@ peers.handlers = handlers = {
         # QUERY_ALL:
         # return the entire blockchain on this node
         when MESSAGES.QUERY_ALL
+          log /QUERY_ALL/
           await blockchain.get_blockchain defer e,blocks
           if e then throw e
 
@@ -96,7 +98,8 @@ peers.handlers = handlers = {
         # RESPONSE_BLOCKCHAIN:
         # this is a response filled with blockchain data
         when MESSAGES.RESPONSE_BLOCKCHAIN
-          return peers.handlers.incoming_blocks(msg.data)
+          log /RESPONSE_BLOCKCHAIN/
+          return handlers.incoming_blocks(msg.data)
 
       # trickle
       return false
@@ -115,7 +118,7 @@ peers.handlers = handlers = {
 
   # sync blockchain
   incoming_blocks: ((incoming_blocks) ->
-    log /incoming_blocks_type/, (typeof incoming_block)
+    log /incoming_blocks_type/, (typeof incoming_blocks)
 
     log 'Handling incoming blocks from a peer', incoming_blocks.length
 
@@ -183,7 +186,7 @@ peers.connect = ((ip) ->
   log 'Connecting to a peer', ip
   peer_ws = new Websocket("ws://#{ip}")
 
-  peer_ws.on 'open', -> peers.handlers.connection(peer_ws)
+  peer_ws.on 'open', -> handlers.connections(peer_ws)
   peer_ws.on 'error', -> null
 )
 
