@@ -210,8 +210,6 @@ blockchain.get_difficulty = ((cb) ->
 
   # adjust difficulty based on last block's solve-time
   if (last.index % env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS is 0) and last.index isnt 0
-    log 'Adjusting POW difficulty'
-
     last_adjustment_index = (last.index + 1 - (+env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS))
 
     await @get_block last_adjustment_index, defer e,last_adjustment_block
@@ -227,12 +225,10 @@ blockchain.get_difficulty = ((cb) ->
     # too fast, increase difficulty
     if secs_elapsed < (secs_expected / 2)
       difficulty += 1
-      log 'Increased POW difficulty by 1', difficulty
 
     # too slow, decrease difficulty
     else if secs_elapsed > (secs_expected * 2)
       difficulty -= 1
-      log 'Reduced POW difficulty by 1', difficulty
 
   return cb null, difficulty
 )
