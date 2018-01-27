@@ -91,8 +91,10 @@ peers.handlers = handlers = {
 
   messages: ((socket) ->
     socket.on 'message', ((msg) ->
-      log 'Handling message', msg
-      msg = JSON.parse(msg)
+      try
+        msg = JSON.parse(msg)
+      catch e
+        return false
 
       return false if !msg?.type?
       return false if msg.type !in _.vals(MESSAGES)
@@ -144,11 +146,9 @@ peers.handlers = handlers = {
     await blockchain.get_last_block defer e,last_existing_block
     if e then throw e
 
-    if last_existing_block.index >= last_incoming_block.index
+    if last_existing_block.hash is last_incoming_block.hash
       log 'We are current with the incoming chain data', last_existing_block
       return false
-
-    log 'Incoming chain is longer', last_incoming_block
 
     # we're behind by a single block
     if last_incoming_block.prev is last_existing_block.hash
@@ -166,8 +166,6 @@ peers.handlers = handlers = {
 
       # response contained multiple blocks, replace our chain
       else
-        log 'Replacing our outdated chain with incoming one', incoming_blocks.length
-
         await blockchain.replace_chain incoming_blocks, defer e
         if e then throw e
   )

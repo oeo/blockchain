@@ -60,22 +60,24 @@ blockchain.add_block = ((block,cb) ->
 )
 
 blockchain.replace_chain = ((new_chain,cb) ->
-  await @get_last_block defer e,last_block
-  if e then return cb e
-
-  if last_block.index >= new_chain.length
-    return cb null, false
-
   await @is_valid_chain new_chain, defer e,valid
   if e then return cb e
 
   if !valid
     return cb new Error 'Received an invalid chain, refusing to `replace_chain`'
 
-  log 'Replacing our blockchain with a larger chain'
-
-  await @set_blockchain new_chain, defer e
+  # check if the chain has a heavier weight than us
+  await blockchain.calculate_difficulty_weight null, defer e,our_weight
   if e then return cb e
+
+  await blockchain.calculate_difficulty_weight new_chain, defer e,their_weight
+  if e then return cb e
+
+  if their_weight > our_weight
+    log 'Replacing our blockchain with a larger chain'
+
+    await @set_blockchain new_chain, defer e
+    if e then return cb e
 
   return cb null, true
 )
@@ -225,6 +227,19 @@ blockchain.get_difficulty = ((cb) ->
       log 'Reduced POW difficulty by 1', (difficulty - 1)
 
   return cb null, difficulty
+)
+
+blockchain.calculate_difficulty_weight = ((blocks=null,cb) ->
+  if !blocks
+    await @get_blockchain defer e,blocks
+    if e then return cb e
+
+  weight = 0
+
+  for block in blocks
+    weight += Math.pow(2,(block.difficulty ? 0))
+
+  return cb null, weight
 )
 
 ##

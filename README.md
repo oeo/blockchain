@@ -2,7 +2,8 @@
 - sha256 in-memory blockchain
 - scaling proof of work
   - automatic difficulty adjustments
-  - p2p concensus difficulty adjustments
+  - concensus difficulty
+  - cumulative difficulty preference instead of chain length
 - rest server
 - websocket p2p syncing
 
