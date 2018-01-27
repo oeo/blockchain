@@ -4,6 +4,9 @@ global.CONFIG = (require('dotenv').config({
   path: __dirname + '/../config'
 })).parsed
 
+for k,v of process.env
+  global.CONFIG[k] = v if global.CONFIG[k]
+
 _ = require('wegweg')({
   globals: on
 })
