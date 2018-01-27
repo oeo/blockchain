@@ -92,6 +92,14 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
     await @get_last_block defer e,prev_block
     if e then return cb e
 
+    # validate difficulty on the new block
+    await @get_difficulty defer e,difficulty
+    if e then return cb e
+
+    if block.difficulty isnt difficulty
+      log new Error 'Invalid block (`difficulty`)'
+      return cb null, false
+
   # validate index
   if block.index isnt (prev_block.index + 1)
     log new Error 'Invalid block (`index`)'
