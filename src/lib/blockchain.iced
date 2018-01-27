@@ -8,7 +8,6 @@ _ = require('wegweg')({
 })
 
 Block = require './block'
-
 hash = require './hash'
 
 GENESIS = new Block({
@@ -16,7 +15,7 @@ GENESIS = new Block({
   ctime: 1517012327
 
   hash: hash.auto(env.GENESIS_HASH_STRING)
-  prev_hash: null
+  prev: null
 
   data: env.GENESIS_HASH_STRING
 })
@@ -97,9 +96,9 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
     log new Error 'Invalid block (`index`)'
     return cb null, false
 
-  # validate prev_hash
-  if block.prev_hash isnt prev_block.hash
-    log new Error 'Invalid block (`prev_hash`)'
+  # validate prev
+  if block.prev isnt prev_block.hash
+    log new Error 'Invalid block (`prev`)'
     return cb null, false
 
   # validate hash
@@ -147,7 +146,7 @@ blockchain.generate_next_block = ((data,cb) ->
   block = new Block({
     index: (last.index + 1)
     ctime: _.time()
-    prev_hash: last.hash
+    prev: last.hash
     data: data
   })
 

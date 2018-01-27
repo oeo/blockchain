@@ -13,17 +13,17 @@ Schema = new mongoose.Schema({
 
   # hash
   hash: String
-  prev_hash: String
+  prev: String
+
+  # pow
+  diff: Number
+  work: Number
 
   # txns
   data: {
     type: mongoose.Schema.Types.Mixed
     default: null
   }
-
-  # pow
-  difficulty: Number
-  proof: Number
 
 },{_id:false})
 
@@ -32,7 +32,7 @@ Schema.path('index').set((x)->
   @hash ?= (hash.sha256([
     @index
     @ctime
-    (@prev_hash ? null)
+    (@prev ? null)
     JSON.stringify(@data ? {})
   ].join('')))
 
@@ -45,7 +45,7 @@ Schema.methods.is_valid_schema = (->
     index: 'number'
     ctime: 'number'
     hash: 'string'
-    prev_hash: 'string'
+    prev: 'string'
     data: 'object'
   }
 
@@ -63,13 +63,13 @@ Schema.statics.is_valid_schema = ((block_obj) ->
     index: 'number'
     ctime: 'number'
     hash: 'string'
-    prev_hash: 'string'
+    prev: 'string'
     data: 'object'
   }
 
-  # ignore `prev_hash` on the genesis block
+  # ignore `prev` on the genesis block
   if block_obj.index is 0 and block_obj.hash is hash.auto(env.GENESIS_HASH_STRING)
-    delete props.prev_hash
+    delete props.prev
 
   for k,v of props
     return false if !block_obj[k]?
@@ -83,7 +83,7 @@ Schema.statics.calculate_hash = ((block_obj) ->
   return hash.sha256([
     block_obj.index
     block_obj.ctime
-    block_obj.prev_hash
+    block_obj.prev
     JSON.stringify(block_obj.data ? {})
   ].join(''))
 )
@@ -99,7 +99,7 @@ if !module.parent
     index: 3
     ctime: 1517012327
     hash: hash.sha256('helo')
-    prev_hash: 'abc'
+    prev: 'abc'
     data: []
   })
 

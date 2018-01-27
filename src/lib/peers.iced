@@ -151,7 +151,7 @@ peers.handlers = handlers = {
     log 'Incoming chain is longer', last_incoming_block
 
     # we're behind by a single block
-    if last_incoming_block.prev_hash is last_existing_block.hash
+    if last_incoming_block.prev is last_existing_block.hash
       log 'Adding a new block to chain from a peer', last_incoming_block
 
       await blockchain.add_block last_incoming_block, defer e,block
