@@ -1,5 +1,5 @@
 # @done
-- sha256 in-memory blockchain
+- sha256 blockchain
 - scaling proof of work
   - automatic difficulty adjustments
   - concensus difficulty
