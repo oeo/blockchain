@@ -2,10 +2,10 @@
 - sha256 blockchain
 - scaling proof of work
   - automatic difficulty adjustments
-  - concensus difficulty
+  - cumulative difficulty preference over chain length
 - rest server
 - websocket p2p syncing
-  - cumulative difficulty preference (vs just chain length)
+  - concensus difficulty
 
 # @todo
 - keypairs + accounts
