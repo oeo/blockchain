@@ -4,7 +4,7 @@
 - websocket p2p syncing
 
 # @todo
-- pow
+- proof of work
 - keypairs/accounts
 - transactions (ledger/memos)
 - automatic peer discovery
