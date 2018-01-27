@@ -15,7 +15,7 @@ peers = {
 peers.MESSAGES = MESSAGES = {
   QUERY_LAST: 0
   QUERY_ALL: 1
-  BLOCKCHAIN_RESPONSE: 2
+  RESPONSE_BLOCKS: 2
 }
 
 # message fns
@@ -36,7 +36,7 @@ peers.broadcast_last_block = (->
   if e then throw e
 
   return @broadcast({
-    type: MESSAGES.BLOCKCHAIN_RESPONSE
+    type: MESSAGES.RESPONSE_BLOCKS
     data: [block]
   })
 )
@@ -79,7 +79,7 @@ peers.handlers = handlers = {
           if e then throw e
 
           return peers.send(socket,{
-            type: MESSAGES.BLOCKCHAIN_RESPONSE
+            type: MESSAGES.RESPONSE_BLOCKS
             data: [block]
           })
 
@@ -91,14 +91,14 @@ peers.handlers = handlers = {
           if e then throw e
 
           return peers.send(socket,{
-            type: MESSAGES.BLOCKCHAIN_RESPONSE
+            type: MESSAGES.RESPONSE_BLOCKS
             data: blocks
           })
 
-        # RESPONSE_BLOCKCHAIN:
+        # RESPONSE_BLOCKS:
         # this is a response filled with blockchain data
-        when MESSAGES.RESPONSE_BLOCKCHAIN
-          log /RESPONSE_BLOCKCHAIN/
+        when MESSAGES.RESPONSE_BLOCKS
+          log /RESPONSE_BLOCKS/
           return handlers.incoming_blocks(msg.data)
 
       # trickle
@@ -124,14 +124,12 @@ peers.handlers = handlers = {
 
     last_incoming_block = _.last(incoming_blocks)
 
-    if !Block.is_valid_structure(last_incoming_block)
-      log new Error 'Incoming block had an invalid structure', last_incoming_block
-      return false
+    log /last_incoming_block/, last_incoming_block
 
     await blockchain.get_last_block defer e,last_existing_block
     if e then throw e
 
-    if last_existing_block.index >= last_incoming_black.index
+    if last_existing_block.index >= last_incoming_block.index
       log 'We are current with the incoming chain data', last_existing_block
       return false
 
@@ -141,12 +139,12 @@ peers.handlers = handlers = {
     if last_incoming_block.prev_hash is last_existing_block.hash
       log 'Adding a new block to chain from a peer', last_incoming_block
 
-      await blockchain.add_block last_incoming_black, defer e,block
+      await blockchain.add_block last_incoming_block, defer e,block
       if e then throw e
 
       # broadcast latest
       return peers.broadcast({
-        type: MESSAGES.BLOCKCHAIN_RESPONSE
+        type: MESSAGES.RESPONSE_BLOCKS
         data: [block]
       })
 
@@ -168,7 +166,7 @@ peers.handlers = handlers = {
 
         # broadcast latest
         return peers.broadcast({
-          type: MESSAGES.BLOCKCHAIN_RESPONSE
+          type: MESSAGES.RESPONSE_BLOCKS
           data: [_.last(incoming_blocks)]
         })
 

@@ -62,9 +62,15 @@ Schema.statics.is_valid_structure = ((block_obj) ->
     data: 'object'
   }
 
+  log /block_obj/, block_obj
+
   for k,v of props
+    if !block_obj[k]?
+      log /missing_property/, {key:k}
     return false if !block_obj[k]?
     if v
+      if typeof block_obj[k] isnt v
+        log /unexpected_property_type/, {expected:v,got:typeof block_obj[k],key:k}
       return false if typeof block_obj[k] isnt v
 
   return true
