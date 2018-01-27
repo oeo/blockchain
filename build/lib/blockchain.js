@@ -235,12 +235,32 @@
   });
 
   blockchain.is_valid_next_block = (function(block, prev_block, cb) {
-    var calced_hash, difficulty, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+    var binary, calced_hash, calculated_hash_difficulty, difficulty, e, ___iced_passed_deferral, __iced_deferrals, __iced_k;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     if (!Block.is_valid_schema(block)) {
       log(new Error('Invalid block (schema)'));
       return cb(null, false);
+    }
+    binary = hash._hex_to_binary(block.hash);
+    calculated_hash_difficulty = (function(_this) {
+      return function() {
+        var i, item, _i, _len, _ref;
+        i = 0;
+        _ref = binary.split('');
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          item = _ref[_i];
+          if (item === '0' || item === 0) {
+            i += 1;
+            continue;
+          }
+          break;
+        }
+        return i;
+      };
+    })(this)();
+    if (block.difficulty > calculated_hash_difficulty) {
+      log(new Error('Invalid block (`difficulty` is greater than calculated hash difficulty)'));
     }
     (function(_this) {
       return (function(__iced_k) {
@@ -257,7 +277,7 @@
                   return prev_block = arguments[1];
                 };
               })(),
-              lineno: 91
+              lineno: 106
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -276,7 +296,7 @@
                     return difficulty = arguments[1];
                   };
                 })(),
-                lineno: 95
+                lineno: 110
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -381,7 +401,7 @@ _continue()
                       return valid = arguments[1];
                     };
                   })(),
-                  lineno: 152
+                  lineno: 166
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -425,7 +445,7 @@ _continue()
               return last = arguments[1];
             };
           })(),
-          lineno: 166
+          lineno: 180
         }));
         __iced_deferrals._fulfill();
       });
@@ -446,7 +466,7 @@ _continue()
                 return difficulty = arguments[1];
               };
             })(),
-            lineno: 169
+            lineno: 183
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -472,7 +492,7 @@ _continue()
                   return block = arguments[1];
                 };
               })(),
-              lineno: 183
+              lineno: 197
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -519,7 +539,7 @@ _continue()
               return last = arguments[1];
             };
           })(),
-          lineno: 205
+          lineno: 219
         }));
         __iced_deferrals._fulfill();
       });
@@ -545,7 +565,7 @@ _continue()
                     return last_adjustment_block = arguments[1];
                   };
                 })(),
-                lineno: 214
+                lineno: 228
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -592,7 +612,7 @@ _continue()
                   return blocks = arguments[1];
                 };
               })(),
-              lineno: 237
+              lineno: 251
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -634,7 +654,7 @@ _continue()
               return next_block = arguments[1];
             };
           })(),
-          lineno: 255
+          lineno: 269
         }));
         __iced_deferrals._fulfill();
       });
