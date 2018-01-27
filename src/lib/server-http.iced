@@ -13,6 +13,7 @@ app.get '/', ((req,res,next) ->
 
   return res.json {
     last: block
+    difficulty: block.difficulty
     uptime: Math.round((new Date - PROCESS_STARTED)/1000)
   }
 )
@@ -33,13 +34,6 @@ app.get '/blocks/:index_or_hash', ((req,res,next) ->
     return next new Error 'Block not found', req.query.q
 
   return res.json block
-)
-
-app.get '/blocks-mine', ((req,res,next) ->
-  await blockchain.generate_next_block {test:1}, defer e,next_block
-  if e then return next e
-
-  return res.json next_block
 )
 
 # peers

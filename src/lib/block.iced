@@ -16,11 +16,14 @@ Schema = new mongoose.Schema({
   prev: String
 
   # pow
-  diff: {
+  difficulty: {
     type: Number
-    default: env.BLOCK_DIFFICULTY_START
+    default: env.DIFFICULTY_LEVEL_START
   }
-  work: Number
+  proof: {
+    type: Number
+    default: 0
+  }
 
   # txns
   data: {
@@ -30,47 +33,18 @@ Schema = new mongoose.Schema({
 
 },{_id:false})
 
-# calc hash on create
-Schema.path('index').set((x)->
-  @hash ?= (hash.sha256([
-    @index
-    @ctime
-    (@prev ? null)
-    JSON.stringify(@data ? {})
-  ].join('')))
-
-  return x
-)
-
-# methods
-Schema.methods.is_valid_schema = (->
-  props = {
-    index: 'number'
-    ctime: 'number'
-    hash: 'string'
-    prev: 'string'
-    diff: 'number'
-    work: 'number'
-    data: 'object'
-  }
-
-  for k,v of props
-    return false if !this[k]?
-    if v
-      return false if typeof this[k] isnt v
-
-  return true
-)
-
 # statics
 Schema.statics.is_valid_schema = ((block_obj) ->
   props = {
     index: 'number'
     ctime: 'number'
+
     hash: 'string'
     prev: 'string'
-    data: 'object'
-    work: 'number'
+
+    difficulty: 'number'
+    proof: 'number'
+
     data: 'object'
   }
 
@@ -78,7 +52,6 @@ Schema.statics.is_valid_schema = ((block_obj) ->
   if block_obj.index is 0 and block_obj.hash is hash.auto(env.GENESIS_HASH_STRING)
     for key in [
       'prev'
-      'work'
       'data'
     ]
       delete props[key]
@@ -91,13 +64,32 @@ Schema.statics.is_valid_schema = ((block_obj) ->
   return true
 )
 
-Schema.statics.calculate_hash = ((block_obj) ->
-  return hash.sha256([
+# validate proof of work
+Schema.statics.is_valid_proof = is_valid_proof = ((block_obj) ->
+  str = ''
+  str += '0' for x in [1..block_obj.difficulty]
+
+  binary = hash._hex_to_binary(block_obj.hash)
+  return true if binary.startsWith(str)
+
+  return false
+)
+
+# calculate block hash
+Schema.statics.calculate_hash = calculate_hash = ((block_obj) ->
+  arr = [
     block_obj.index
     block_obj.ctime
-    block_obj.prev
+
+    (block_obj.prev ? null)
+
+    block_obj.difficulty
+    block_obj.proof
+
     JSON.stringify(block_obj.data ? {})
-  ].join(''))
+  ]
+
+  return hash.sha256(arr.join(''))
 )
 
 ##

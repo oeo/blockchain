@@ -10,18 +10,15 @@ _ = require('wegweg')({
 Block = require './block'
 hash = require './hash'
 
-GENESIS = new Block({
+GENESIS = {
   index: 0
   ctime: 1517012327
-
   hash: hash.auto(env.GENESIS_HASH_STRING)
-  prev: null
-
   data: env.GENESIS_HASH_STRING
-})
+}
 
 blockchain = {
-  blocks: [GENESIS]
+  blocks: [new Block(GENESIS)]
 }
 
 ## @todo: redis persistence
@@ -53,6 +50,8 @@ blockchain.add_block = ((block,cb) ->
 
   if !valid
     return cb new Error 'Block is invalid'
+
+  # @todo: distribute block reward
 
   @blocks.push new Block(block)
   require('./peers').broadcast_last_block()
@@ -106,7 +105,12 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
     log new Error 'Invalid block (`hash`)'
     return cb null, false
 
-  # k
+  # validate pow
+  if !Block.is_valid_proof(block)
+    log new Error 'Invalid block (`proof`)'
+    return cb null, false
+
+  # k.
   return cb null, true
 )
 
@@ -139,57 +143,77 @@ blockchain.is_valid_chain = ((chain,cb) ->
   return cb null, true
 )
 
+##
 blockchain.generate_next_block = ((data,cb) ->
   await @get_last_block defer e,last
   if e then return cb e
 
-  block = new Block({
+  await @get_difficulty defer e,difficulty
+  if e then return cb e
+
+  block_base = {
     index: (last.index + 1)
     ctime: _.time()
-    prev: last.hash
-    data: data
-  })
 
-  block.hash = Block.calculate_hash(block)
+    prev: last.hash
+
+    difficulty: difficulty
+
+    data: data
+  }
+
+  await blockchain.mine_block block_base, defer e,block
+  if e then return cb e
 
   return cb null, block
 )
 
-##
+blockchain.mine_block = ((block,cb) ->
+  block.proof ?= 0
+  block.hash = Block.calculate_hash(block)
+
+  while 1
+    block.hash = Block.calculate_hash(block)
+
+    if Block.is_valid_proof(block)
+      return cb null, block
+    else
+      block.proof += 1
+
+  return cb null, false
+)
+
 blockchain.get_difficulty = ((cb) ->
   await @get_last_block defer e,last
   if e then return cb e
 
-  difficulty = (last.difficulty ? env.DIFFICULTY_START)
+  difficulty = +(last.diff ? env.DIFFICULTY_LEVEL_START)
 
   # adjust difficulty based on last block's solve-time
-  if last.index % env.DIFFICULTY_START and last.index isnt 0
-    log 'Calculating new difficulty'
+  if (last.index % env.difficulty_INCREASE_INTERVAL_BLOCKS is 0) and last.index !in [0,env.difficulty_INCREASE_INTERVAL_BLOCKS]
+    log 'Adjusting POW difficulty'
 
-    last_adjustment_index = (last.index + 1 - env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS)
+    last_adjustment_index = (last.index + 1 - (+env.difficulty_INCREASE_INTERVAL_BLOCKS))
 
     await @get_block last_adjustment_index, defer e,last_adjustment_block
     if e then return cb e
 
-    if !last_adjustment_block
-      return cb null, difficulty
+    return cb null, difficulty if !last_adjustment_block
 
     difficulty = last_adjustment_block.diff
 
-    secs_expected = (env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS * env.DIFFICULTY_SOLVE_INTERVAL_SECS)
+    secs_expected = (+env.difficulty_INCREASE_INTERVAL_BLOCKS * +env.DIFFICULTY_SOLVE_INTERVAL_SECS)
     secs_elapsed = (last.ctime - last_adjustment_block.ctime)
 
-    log /adjustment parameters/, {expected:seconds_expected,elapsed:seconds_elapsed}
-
+    # too fast, increase difficulty
     if secs_elapsed < (secs_expected / 2)
-      log 'Increasing difficulty by 1', (difficulty + 1)
       difficulty += 1
+      log 'Increased POW difficulty by 1', (difficulty + 1)
 
+    # too slow, decrease difficulty
     else if secs_elapsed > (secs_expected * 2)
-      log 'Reducing difficulty by 1', (difficulty - 1)
       difficulty -= 1
-    else
-      log 'Keeping the same difficulty level for now', difficulty
+      log 'Reduced POW difficulty by 1', (difficulty - 1)
 
   return cb null, difficulty
 )
