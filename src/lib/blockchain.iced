@@ -110,7 +110,16 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
     log new Error 'Invalid block (`proof`)'
     return cb null, false
 
-  # k.
+  # validate ctime
+  if block.ctime < (prev_block.ctime - 60)
+    log new Error 'Invalid block (`ctime` before previous block)'
+    return cb null, false
+
+  if block.ctime > (_.time() + 60)
+    log new Error 'Invalid block (`ctime` too far in the future)'
+    return cb null, false
+
+  # k, fine.
   return cb null, true
 )
 
@@ -187,22 +196,22 @@ blockchain.get_difficulty = ((cb) ->
   await @get_last_block defer e,last
   if e then return cb e
 
-  difficulty = +(last.diff ? env.DIFFICULTY_LEVEL_START)
+  difficulty = +(last.difficulty ? env.DIFFICULTY_LEVEL_START)
 
   # adjust difficulty based on last block's solve-time
-  if (last.index % env.difficulty_INCREASE_INTERVAL_BLOCKS is 0) and last.index !in [0,env.difficulty_INCREASE_INTERVAL_BLOCKS]
+  if (last.index % env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS is 0) and last.index isnt 0
     log 'Adjusting POW difficulty'
 
-    last_adjustment_index = (last.index + 1 - (+env.difficulty_INCREASE_INTERVAL_BLOCKS))
+    last_adjustment_index = (last.index + 1 - (+env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS))
 
     await @get_block last_adjustment_index, defer e,last_adjustment_block
     if e then return cb e
 
     return cb null, difficulty if !last_adjustment_block
 
-    difficulty = last_adjustment_block.diff
+    difficulty = last_adjustment_block.difficulty
 
-    secs_expected = (+env.difficulty_INCREASE_INTERVAL_BLOCKS * +env.DIFFICULTY_SOLVE_INTERVAL_SECS)
+    secs_expected = (+env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS * +env.DIFFICULTY_SOLVE_INTERVAL_SECS)
     secs_elapsed = (last.ctime - last_adjustment_block.ctime)
 
     # too fast, increase difficulty

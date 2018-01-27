@@ -66,3 +66,5 @@ if !module.parent
   log /TEST/
   log hash.sha256({hello:1})
 
+  log hash._hex_to_binary('0000000000000000001dea4ec410fad05526369a3ae077945dbd2d9d97c1bb1a')
+

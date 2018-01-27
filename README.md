@@ -1,5 +1,8 @@
 # @done
 - sha256 in-memory blockchain
+- scaling proof of work
+  - automatic difficulty adjustments
+  - p2p concensus difficulty adjustments
 - rest server
 - websocket p2p syncing
 
