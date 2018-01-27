@@ -1,21 +1,12 @@
+require('dotenv').config({path: __dirname + '/../.env'})
+
 _ = require('wegweg')({
   globals: on
 })
 
-hash = require './lib/hash'
-
-Block = require './lib/block'
-
-GENESIS = new Block({
-  id: 0
-
-  hash: hash.sha256('helo@jolt')
-  prev_hash: null
-
-  ctime: 1517011414
-
-
-})
+blockchain = require './lib/blockchain'
+http_server = require './lib/server-http'
+websocket_server = require './lib/server-websocket'
 
 log "rdy@#{new Date}"
 

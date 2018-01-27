@@ -2,6 +2,8 @@ _ = require('wegweg')({
   globals: on
 })
 
+log /process.env/, env
+
 hash = require './hash'
 
 Block = require './block'
