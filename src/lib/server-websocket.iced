@@ -1,8 +1,18 @@
-module.exports = logger = {
+_ = require('wegweg')({
+  globals: on
+})
 
+Websocket = require 'ws'
+
+blockchain = require './blockchain'
+
+# primary export
+websocket = {
+  sockets: []
 }
 
-if !module.parent
-  log /TEST/
-  exit 0
+##
+module.exports = websocket
+
+
 

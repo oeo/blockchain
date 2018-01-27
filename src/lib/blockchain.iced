@@ -51,7 +51,7 @@ blockchain.add_block = ((block,cb) ->
   if e then return cb e
 
   if !valid
-    return cb new Error 'Block is invalid'
+    return cb new Error 'Block is invalid' if !valid
 
   @blocks.push(new_block = new Block(block))
 

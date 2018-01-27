@@ -41,13 +41,11 @@ Schema.methods.is_valid_structure = (->
     ctime: 'number'
     hash: 'string'
     prev_hash: 'string'
-
-    #data: 'object'
-    data: null
+    data: 'object'
   }
 
   for k,v of props
-    return false if !this[k]
+    return false if !this[k]?
     if v
       return false if typeof this[k] isnt v
 
@@ -61,13 +59,11 @@ Schema.statics.is_valid_structure = ((block_obj) ->
     ctime: 'number'
     hash: 'string'
     prev_hash: 'string'
-
-    #data: 'object'
-    data: null
+    data: 'object'
   }
 
   for k,v of props
-    return false if !block_obj[k]
+    return false if !block_obj[k]?
     if v
       return false if typeof block_obj[k] isnt v
 
