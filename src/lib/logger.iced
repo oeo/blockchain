@@ -1,6 +1,6 @@
-module.exports = logger = {
-
-}
+module.exports = logger = (->
+  # @todo
+)
 
 if !module.parent
   log /TEST/
