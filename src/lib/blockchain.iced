@@ -227,12 +227,12 @@ blockchain.get_difficulty = ((cb) ->
     # too fast, increase difficulty
     if secs_elapsed < (secs_expected / 2)
       difficulty += 1
-      log 'Increased POW difficulty by 1', (difficulty + 1)
+      log 'Increased POW difficulty by 1', difficulty
 
     # too slow, decrease difficulty
     else if secs_elapsed > (secs_expected * 2)
       difficulty -= 1
-      log 'Reduced POW difficulty by 1', (difficulty - 1)
+      log 'Reduced POW difficulty by 1', difficulty
 
   return cb null, difficulty
 )
