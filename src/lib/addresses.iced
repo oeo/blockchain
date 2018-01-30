@@ -40,9 +40,17 @@ addresses.get_public_key = ((priv) ->
   return curve.keyFromPrivate(priv,'hex').getPublic().encode('hex')
 )
 
+addresses._to_hex_str = ((arr) ->
+  return (_.map Array.from(arr), (byte) ->
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2)
+  ).join('')
+)
+
 ##
 if !module.parent
   log /TEST/
+
+  #log addresses._to_hex_str('hello, world')
 
   ###
   tmp = {}
