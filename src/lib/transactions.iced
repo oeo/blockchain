@@ -13,7 +13,7 @@ curve = new elliptic.ec('curve25519')
 addresses = require './addresses'
 hash = require './hash'
 
-COINBASE_AMOUNT = 1000
+COINBASE_AMOUNT = (+CONFIG.BLOCK_REWARD)
 
 class Input
   output_id: null
@@ -52,7 +52,7 @@ class Transaction
   )
 
   # hash the inputs and outputs to create a transaction id
-  @calculate_id: ((txn) ->
+  @calculate_transaction_id: ((txn) ->
     inputs_str = (_.map txn.inputs, (input) ->
       return input.output_id + input.output_index
     ).join('')
@@ -69,7 +69,7 @@ class Transaction
     input = txn.inputs[input_index]
 
     # @todo
-    await require('./lib/blockchain').find_unspent_outputs defer e,unspent_outputs
+    await require('./lib/blockchain').get_unspent_outputs defer e,unspent_outputs
     if e then return cb e
 
     unspent = _.find(unspent_outputs,{
@@ -89,11 +89,42 @@ class Transaction
   )
 
   # validate a transaction
-  @validate: ((txn,cb) ->
+  @validate_transaction: ((txn,cb) ->
 
-    # validate id hash
-    if Transaction.calculate_id(txn) isnt txn.id
+    # validate id
+    if Transaction.calculate_transaction_id(txn) isnt txn.id
       log new Error 'Invalid transaction (`id`)'
+      return cb null, false
+
+    # k, fine.
+    return cb null, true
+  )
+
+  # validate a coinbase transaction
+  @validate_coinbase_transaction = ((txn,cb) ->
+
+    # validate id
+    if Transaction.calculate_transaction_id(txn) isnt txn.id
+      log new Error 'Invalid coinbase transaction (`id`)'
+      return cb null, false
+
+    # validate input/output lengths
+    if txn.inputs?.length isnt 1 or txn.outputs?.length isnt 1
+      log new Error 'Invalid coinbase transaction (input/output length)'
+      return cb null, false
+
+    # get block height, validate it
+    await blockchain.get_last_block defer e,last_block
+    if e then return cb e
+
+    input = _.first(txn.inputs)
+
+    if input.output_index isnt last_block.index
+      log new Error 'Invalid coinbase transaction (`output_index` not block height)'
+      return cb null, false
+
+    if output.amount isnt COINBASE_AMOUNT
+      log new Error 'Invalid coinbase transaction (amount incorrect)'
       return cb null, false
 
     # k, fine.
