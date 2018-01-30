@@ -24,8 +24,7 @@ blockchain = {
     new Block(GENESIS)
   ]
 
-  # unspent transaction outputs
-  unspent_outputs: []
+  balances: {}
 }
 
 # blocks
@@ -92,12 +91,6 @@ blockchain.replace_chain = ((new_chain,cb) ->
     if e then return cb e
 
   return cb null, true
-)
-
-# unspent outputs
-## @todo: redis persistence
-blockchain.get_unspent_outputs = ((cb) ->
-  return cb null, @unspent_outputs
 )
 
 ##

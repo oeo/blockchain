@@ -13,15 +13,16 @@ curve = new elliptic.ec('curve25519')
 addresses = require './addresses'
 hash = require './hash'
 
-COINBASE_AMOUNT = (+CONFIG.BLOCK_REWARD)
+COINBASE_AMOUNT = +CONFIG.BLOCK_REWARD
 
 class Input
-  output_id: null
+  output_transaction_id: null
   output_index: null
   signature: null
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
+    @
   )
 
 class Output
@@ -30,16 +31,18 @@ class Output
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
+    @
   )
 
 class UnspentOutput
-  output_id: null
+  output_transaction_id: null
   output_index: null
   address: null
   amount: 0
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
+    @
   )
 
 class Transaction
@@ -49,6 +52,7 @@ class Transaction
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
+    @
   )
 
   # hash the inputs and outputs to create a transaction id
@@ -131,12 +135,31 @@ class Transaction
     return cb null, true
   )
 
+# create a new coinbase txn
+create_coinbase_transaction = ((block_index) ->
+
+  txn = new Transaction({
+    inputs: [{
+      output_index: block_index
+    }]
+    outputs: [
+      address: addresses.TEST_ADDRESSES.DAN
+      amount: COINBASE_AMOUNT
+    ]
+  })
+
+  txn.id = Transaction.calculate_transaction_id(txn)
+
+  return txn
+)
+
 ##
 module.exports = txns = {
   Input
   Output
   UnspentOutput
   Transaction
+  create_coinbase_transaction
 }
 
 ## test
@@ -144,6 +167,7 @@ if !module.parent
 
   log /TEST/
 
+  ###
   t = new Transaction({
     id: 'hello'
   })
@@ -151,7 +175,10 @@ if !module.parent
   await Transaction.validate t, defer e,valid
   log e
   log valid
+  ###
 
-  log t
+  coinbase_txn = create_coinbase_transaction(1)
+  log coinbase_txn
+
   exit 0
 
