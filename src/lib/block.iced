@@ -8,6 +8,7 @@ hash = require './hash'
 
 # entity
 Schema = new mongoose.Schema({
+
   index: Number
   ctime: Number
 
@@ -20,6 +21,7 @@ Schema = new mongoose.Schema({
     type: Number
     default: env.DIFFICULTY_LEVEL_START
   }
+
   proof: {
     type: Number
     default: 0

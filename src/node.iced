@@ -17,6 +17,6 @@ log CONFIG
 peers = require './lib/peers'
 peers.server.listen(env.WEBSOCKET_PORT)
 
-http_server = require './lib/server-http'
+http_server = require './lib/rest'
 http_server.listen(CONFIG.HTTP_PORT)
 

@@ -18,7 +18,7 @@ app.get '/', ((req,res,next) ->
   }
 )
 
-# blocks
+# all blocks
 app.get '/blocks', ((req,res,next) ->
   await blockchain.get_blockchain defer e,chain
   if e then return next e
@@ -26,6 +26,7 @@ app.get '/blocks', ((req,res,next) ->
   return res.json chain
 )
 
+# single block
 app.get '/blocks/:index_or_hash', ((req,res,next) ->
   await blockchain.get_block req.params.index_or_hash, defer e,block
   if e then return next e

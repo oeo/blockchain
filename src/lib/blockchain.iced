@@ -18,7 +18,10 @@ GENESIS = {
 }
 
 blockchain = {
-  blocks: [new Block(GENESIS)]
+  blocks: [
+    new Block(GENESIS)
+  ]
+  unspent_outputs: []
 }
 
 ## @todo: redis persistence
@@ -88,7 +91,7 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
     log new Error 'Invalid block (schema)'
     return cb null, false
 
-  # validate difficulty against hash
+  # validate provided difficulty against hash difficulty
   binary = hash._hex_to_binary(block.hash)
 
   calculated_hash_difficulty = (do =>

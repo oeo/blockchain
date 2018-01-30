@@ -50,8 +50,6 @@ peers.broadcast = ((msg) ->
     socket.send(JSON.stringify(msg))
 )
 peers.broadcast_last_block = (->
-  log 'peers.broadcast_last_block()'
-
   await blockchain.get_last_block defer e,block
   if e then throw e
 

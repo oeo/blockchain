@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^4.0.0",
+    "elliptic": "^6.4.0",
     "lodash": "^4.17.4",
     "mongoose": "^5.0.1",
     "wegweg": "^0.17.0",
