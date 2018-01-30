@@ -18,12 +18,17 @@ GENESIS = {
 }
 
 blockchain = {
+
+  # primary chain
   blocks: [
     new Block(GENESIS)
   ]
+
+  # unspent transaction outputs
   unspent_outputs: []
 }
 
+# blocks
 ## @todo: redis persistence
 blockchain.get_blockchain = ((cb) ->
   return cb null, @blocks
@@ -84,6 +89,17 @@ blockchain.replace_chain = ((new_chain,cb) ->
 
   return cb null, true
 )
+
+# unspent outputs
+## @todo: redis persistence
+blockchain.get_unspent_outputs = ((cb) ->
+  return cb null, @unspent_outputs
+)
+
+blockchain.find_unspent_output = ((opt,cb) ->
+  return cb null, _.find(@unspent_outputs,opt)
+)
+
 
 ##
 blockchain.is_valid_next_block = ((block,prev_block,cb) ->

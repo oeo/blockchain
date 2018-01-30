@@ -50,6 +50,7 @@ class Transaction
   id: null
   inputs: []
   outputs: []
+
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
@@ -61,15 +62,35 @@ class Transaction
     inputs_str = (_.map txn.inputs, (input) ->
       return input.output_id + input.output_index
     ).join('')
+
     outputs_str = (_.map txn.outputs, (output) ->
       return output.address + output.amount
     ).join('')
+
     return hash.sha256(inputs_str + outputs_str)
+  )
+
+  @sign_input: ((txn,input_index,priv,cb) ->
+    await blockchain.get_unspent_outputs defer e,unspent_outputs
+    if e then return cb e
+
+    data_to_sign = txn.id
+    input = txn.inputs[input_index]
+
+
+    #
+    return cb null, true
   )
 
   # validate a transaction
   @validate: ((txn,cb) ->
 
+    # validate id hash
+    if Transaction.calculate_id(txn) isnt txn.id
+      log new Error 'Invalid transaction (`id`)'
+      return cb null, false
+
+    # k, fine.
     return cb null, true
   )
 
@@ -90,7 +111,9 @@ if !module.parent
     id: 'hello'
   })
 
-  log /id/, Transaction.calculate_id(t)
+  await Transaction.validate t, defer e,valid
+  log e
+  log valid
 
   log t
   exit 0
