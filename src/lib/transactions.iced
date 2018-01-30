@@ -57,17 +57,21 @@ class Transaction
   )
 
   # hash the inputs and outputs to create a transaction id
-  @get_id: ((t) ->
-    inputs_str = (_.map t.inputs, (input) ->
+  @calculate_id: ((txn) ->
+    inputs_str = (_.map txn.inputs, (input) ->
       return input.output_id + input.output_index
     ).join('')
-    outputs_str = (_.map t.outputs, (output) ->
+    outputs_str = (_.map txn.outputs, (output) ->
       return output.address + output.amount
     ).join('')
     return hash.sha256(inputs_str + outputs_str)
   )
 
-  @sign_
+  # validate a transaction
+  @validate: ((txn,cb) ->
+
+    return cb null, true
+  )
 
 ##
 module.exports = txns = {
@@ -86,7 +90,7 @@ if !module.parent
     id: 'hello'
   })
 
-  log /id/, Transaction.get_id(t)
+  log /id/, Transaction.calculate_id(t)
 
   log t
   exit 0
