@@ -59,9 +59,11 @@ blockchain.add_block = ((block,cb) ->
   if !valid
     return cb new Error 'Block is invalid'
 
-  # @todo: distribute block reward
+  new_block = new Block(block)
+  @blocks.push new_block
 
-  @blocks.push new Block(block)
+  log 'Added a new block', new_block
+
   require('./peers').broadcast_last_block()
 
   return cb null, true
@@ -95,11 +97,6 @@ blockchain.replace_chain = ((new_chain,cb) ->
 blockchain.get_unspent_outputs = ((cb) ->
   return cb null, @unspent_outputs
 )
-
-blockchain.find_unspent_output = ((opt,cb) ->
-  return cb null, _.find(@unspent_outputs,opt)
-)
-
 
 ##
 blockchain.is_valid_next_block = ((block,prev_block,cb) ->

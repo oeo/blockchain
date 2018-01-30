@@ -10,7 +10,6 @@ _ = require('wegweg')({
 elliptic = require 'elliptic'
 curve = new elliptic.ec('curve25519')
 
-blockchain = require './blockchain'
 addresses = require './addresses'
 hash = require './hash'
 
@@ -23,7 +22,6 @@ class Input
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
-    return @
   )
 
 class Output
@@ -32,7 +30,6 @@ class Output
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
-    return @
   )
 
 class UnspentOutput
@@ -43,18 +40,15 @@ class UnspentOutput
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
-    return @
   )
 
 class Transaction
   id: null
   inputs: []
   outputs: []
-
   constructor: ((opt) ->
     for k,v of opt
       if this[k]? then this[k] = v
-    return @
   )
 
   # hash the inputs and outputs to create a transaction id
@@ -70,16 +64,27 @@ class Transaction
     return hash.sha256(inputs_str + outputs_str)
   )
 
-  @sign_input: ((txn,input_index,priv,cb) ->
-    await blockchain.get_unspent_outputs defer e,unspent_outputs
-    if e then return cb e
-
-    data_to_sign = txn.id
+  # calculate an input signature
+  @calculate_input_signature: ((txn,input_index,prv,cb) ->
     input = txn.inputs[input_index]
 
+    await require('./lib/blockchain').find_unspent_outputs defer e,unspent_outputs
+    if e then return cb e
 
-    #
-    return cb null, true
+    unspent = _.find(unspent_outputs,{
+      output_id: input.output_id
+      output_index: input.output_index
+    })
+
+    if !unspent
+      return cb new Error 'Could not find referenced unspent output'
+
+    if unspent.address isnt addresses.get_public_key(prv)
+      return cb new Error 'Address did not match input private key'
+
+    key = curve.keyFromPrivate(prv,'hex')
+
+    return cb null, addresses._to_hex_str(key.sign(txn.id).toDER())
   )
 
   # validate a transaction
