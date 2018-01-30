@@ -66,6 +66,8 @@ blockchain.add_block = ((block,cb) ->
 
   require('./peers').broadcast_last_block()
 
+  log 'update_unspent_outputs()'
+
   return cb null, true
 )
 

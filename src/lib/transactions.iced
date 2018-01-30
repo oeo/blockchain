@@ -68,6 +68,7 @@ class Transaction
   @calculate_input_signature: ((txn,input_index,prv,cb) ->
     input = txn.inputs[input_index]
 
+    # @todo
     await require('./lib/blockchain').find_unspent_outputs defer e,unspent_outputs
     if e then return cb e
 
