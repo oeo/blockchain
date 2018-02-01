@@ -3,15 +3,15 @@
 - scaling proof of work
   - automatic difficulty adjustments
   - cumulative difficulty preference over chain length
-- rest server
+- node rest server
 - websocket p2p syncing
   - concensus difficulty
+- keypairs + accounts
 
 # @todo
-- keypairs + accounts
 - transactions (ledger/memos)
 - automatic peer discovery
-- redis persistence
+- leveldb persistence
 - chain/account explorer
 - wallet
 
