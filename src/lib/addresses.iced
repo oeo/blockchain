@@ -48,7 +48,9 @@ addresses.verify = ((str,sig,pub) ->
 )
 
 addresses.generate = ((priv_str=null) ->
-  priv_str = @_random_str(32)
+  if !priv_str
+    priv_str = @_random_str(32)
+
   key = curve.keyFromPrivate(priv_str,'hex')
 
   tmp = {
