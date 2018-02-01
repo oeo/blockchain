@@ -8,7 +8,7 @@ _ = require('wegweg')({
 })
 
 elliptic = require 'elliptic'
-curve = new elliptic.ec('curve25519')
+curve = (new elliptic.ec 'curve25519')
 
 addresses = require './addresses'
 hash = require './hash'
