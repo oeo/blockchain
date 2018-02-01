@@ -28,7 +28,7 @@ blockchain = {
 }
 
 # blocks
-## @todo: redis persistence
+## @todo: persistence
 blockchain.get_blockchain = ((cb) ->
   return cb null, @blocks
 )
