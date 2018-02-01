@@ -30,24 +30,27 @@ Transaction {
 
 module.exports = txns = {}
 
-txn._template = {
+###
+transaction = {
   id: null
   input: {
     address: null
     signature: null
   }
-  outputs: []
+  outputs: [{
+    address:
+    amount: 0
+  }]
 }
+###
 
 txns.get_id = ((transaction,cb) ->
   return cb null, hash
 )
 
-txns.get_signature = ((transaction,prv,cb) ->
-  await addresses.sign transaction.id, prv, defer e,signature
-  if e then return cb e
-
-  return cb null, signature
+txns.get_signature = ((transaction,priv,cb) ->
+  signed = addresses.sign transaction.id, priv
+  return cb null, signed
 )
 
 ## test

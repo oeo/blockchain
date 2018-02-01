@@ -7,9 +7,7 @@ _ = require('wegweg')({
   globals: on
 })
 
-crypto = require 'crypto'
 elliptic = require 'elliptic'
-
 curve = new elliptic.ec 'secp256k1'
 
 hash = require './hash'
