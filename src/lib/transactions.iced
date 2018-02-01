@@ -20,10 +20,8 @@ Output {
 }
 Transaction {
   id: null
-  input: {
-    address: null
-    signature: null
-  }
+  from: null
+  signature: null
   outputs: []
 }
 ###
@@ -33,10 +31,8 @@ module.exports = txns = {}
 ###
 transaction = {
   id: null
-  input: {
-    address: null
-    signature: null
-  }
+  input: null
+  signature: null
   outputs: [{
     address:
     amount: 0

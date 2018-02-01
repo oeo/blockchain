@@ -35,6 +35,23 @@ Schema = new mongoose.Schema({
 
 },{_id:false})
 
+###
+block = {
+  index: 0
+  ctime: 0
+
+  hash: null
+  prev: null
+
+  difficulty: 5
+  proof: null
+
+  data: {
+    transactions: [transaction]
+  }
+}
+###
+
 # statics
 Schema.statics.is_valid_schema = ((block_obj) ->
   props = {
