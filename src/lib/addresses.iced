@@ -61,7 +61,7 @@ addresses.generate = ((priv_str=null) ->
   return tmp
 )
 
-addresses.load_from_priv = ((priv_str) -> @generate(priv_str))
+addresses.load_from_priv = (priv_str) -> @generate(priv_str)
 
 addresses._to_hex_str = ((arr) ->
   return (_.map Array.from(arr), (byte) ->
