@@ -99,6 +99,8 @@ txns.create = ((opt,cb) ->
   transaction = {
     id: null
     from: opt.from
+    last_input_block: null
+    last_output_block: null
     signature: null
     outputs: opt.outputs
   }
