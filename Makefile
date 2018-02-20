@@ -8,5 +8,5 @@ main:
 	fi;
 	mkdir build
 	iced -c --runtime inline --output build src
-	git add build/*
+	git add -f build/*
 
