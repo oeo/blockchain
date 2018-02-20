@@ -3,10 +3,10 @@
 - scaling proof of work
   - automatic difficulty adjustments
   - cumulative difficulty preference over chain length
-- http server
+- http rest server
 - websocket p2p syncing
   - concensus difficulty
-- keypairs + accounts
+- keypairs/accounts/wallets
 - static block reward
 - transactions base
 

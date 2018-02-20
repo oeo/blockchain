@@ -2,8 +2,10 @@ _ = require('wegweg')({
   globals: on
 })
 
+addresses = require './addresses'
 blockchain = require './blockchain'
 transactions = require './transactions'
+
 peers = require './peers'
 
 app = _.app()
@@ -38,20 +40,25 @@ app.get '/blocks/:index_or_hash', ((req,res,next) ->
   return res.json block
 )
 
-# coin balances
-app.get '/balances', ((req,res,next) ->
+# all wallets
+app.get '/wallets', ((req,res,next) ->
   await blockchain.get_balances defer e,balances
   if e then return next e
 
   return res.json balances
 )
 
-# single address balance
-app.get '/balances/:address', ((req,res,next) ->
+# single wallet
+app.get '/wallets/:address', ((req,res,next) ->
   await blockchain.get_balance req.params.address, defer e,balance
   if e then return next e
 
   return res.json(balance)
+)
+
+# generate wallet
+app.get '/wallets-generate', ((req,res,next) ->
+  return res.json(addresses.generate())
 )
 
 # single transaction

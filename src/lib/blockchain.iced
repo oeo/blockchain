@@ -176,8 +176,8 @@ blockchain.is_valid_next_block = ((block,prev_block,cb) ->
   txns = require __dirname + '/transactions'
 
   if (transactions = block.data?.transactions)?.length
-    for item in transactions
-      await txns.validate item, defer e
+    for transaction in transactions
+      await txns.validate transaction, defer e
       if e then return cb e
 
   # k, fine.

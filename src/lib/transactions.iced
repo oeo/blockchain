@@ -16,14 +16,12 @@ hash = require './hash'
 # primary export
 module.exports = txns = {
 
-  # unconfirmed
+  # unconfirmed transactions
   pool: []
 }
 
 txns.get_id = ((transaction,cb) ->
   bulk = transaction.from
-
-  #bulk += transaction.last_input_block
   bulk += transaction.last_output_block
 
   for item in transaction.outputs
@@ -31,18 +29,6 @@ txns.get_id = ((transaction,cb) ->
     bulk += item.amount
 
   return cb null, hash.sha256(bulk)
-)
-
-txns.get_last_transaction_blocks = ((pub,cb) ->
-  blockchain = require __dirname + '/blockchain'
-
-  await blockchain.get_balances defer e,balances
-  if e then return next e
-
-  return cb null, {
-    last_input_block: (balances[pub]?.last_input_block ? null)
-    last_output_block: (balances[pub]?.last_output_block ? null)
-  }
 )
 
 txns.get_signature = ((transaction,priv,cb) ->
@@ -57,8 +43,6 @@ txns.verify_signature = ((transaction,cb) ->
 
 # generate new transaction
 txns.create = ((opt,cb) ->
-  blockchain = require __dirname + '/blockchain'
-
   required = [
     'from'
     'priv'
@@ -78,38 +62,32 @@ txns.create = ((opt,cb) ->
   transaction = {
     id: null
     from: opt.from
-    #last_input_block: null
     last_output_block: null
     signature: null
     outputs: opt.outputs
   }
 
-  # add last input/output blocks
+  # add last output block index
+  blockchain = require __dirname + '/blockchain'
+
   await blockchain.get_balance opt.from, defer e,balance
   if e then return cb
 
-  #transaction.last_input_block = (balance?.last_input_block ? null)
   transaction.last_output_block = (balance?.last_output_block ? null)
 
   # hash the block and sign it
   await @get_id transaction, defer e,transaction.id
   if e then return cb e
 
+  # generate signature
   await @get_signature transaction, opt.priv, defer e,transaction.signature
   if e then return cb e
-
-  log /created transaction/
-  log transaction
 
   return cb null, transaction
 )
 
+# validate given transaction object
 txns.validate = ((transaction,cb) ->
-  blockchain = require __dirname + '/blockchain'
-
-  log /validating transaction/
-  log transaction
-
   required = [
     'id'
     'from'
@@ -137,31 +115,33 @@ txns.validate = ((transaction,cb) ->
     total_out += (+item.amount)
 
   # check available balance
+  blockchain = require __dirname + '/blockchain'
+
   await blockchain.get_balance transaction.from, defer e,balance
   if e then return cb e
 
   if !balance or (balance?.amount < total_out)
     return cb new Error 'Invalid transaction (output total exceeds balance)'
 
-  # check last output block
+  # validate last output block index
   if balance?.last_output_block isnt transaction.last_output_block
     return cb new Error 'Invalid transaction (`last_output_block`)'
 
-  # id hash
+  # validate hash
   await @get_id transaction, defer e,calculated_tid
   if e then return cb e
 
   if transaction.id isnt calculated_tid
     return cb new Error 'Invalid transaction (`id`)'
 
-  # id signature
+  # validate signature
   await @verify_signature transaction, defer e,valid
   if e then return cb e
 
   if !valid
     return cb new Error 'Invalid transaction (`signature`)'
 
-  # fine.
+  # txn is fine
   return cb null, true
 )
 
