@@ -206,7 +206,11 @@ blockchain.is_valid_chain = ((chain,cb) ->
 )
 
 ##
-blockchain.generate_next_block = ((data,cb) ->
+blockchain.generate_next_block = ((data,solver,cb) ->
+  if !cb and _.type(solver) is 'function'
+    cb = solver
+    solver = null
+
   await @get_last_block defer e,last
   if e then return cb e
 
@@ -218,6 +222,7 @@ blockchain.generate_next_block = ((data,cb) ->
     ctime: _.time()
     prev: last.hash
     difficulty: difficulty
+    solver: solver
     data: data
   }
 
@@ -302,7 +307,7 @@ blockchain.calculate_balances = ((blocks=null,cb) ->
       for transaction in block.data.transactions
         total_out = 0
 
-        for output in outputs
+        for output in transaction.outputs
           balances[output.to] ?= {
             last_input_block: null
             last_output_block: null
@@ -324,15 +329,15 @@ blockchain.calculate_balances = ((blocks=null,cb) ->
         balances[transaction.from].amount -= total_out
 
     # add block reward
-    if block.data?.solver
-      balances[block.data.solver] ?= {
+    if block.solver
+      balances[block.solver] ?= {
         last_input_block: null
         last_output_block: null
         amount: 0
       }
 
-      balances[block.data.solver].last_input_block = block.index
-      balances[block.data.solver].amount += (+CONFIG.BLOCK_REWARD)
+      balances[block.solver].last_input_block = block.index
+      balances[block.solver].amount += (+CONFIG.BLOCK_REWARD)
 
   return cb null, balances
 )

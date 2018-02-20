@@ -13,9 +13,15 @@ peers = {
 }
 
 peers.MESSAGES = MESSAGES = {
+
+  # blockchain
   QUERY_LAST: 0
   QUERY_ALL: 1
   RESPONSE_BLOCKS: 2
+
+  # txn pool
+  QUERY_POOL: 3
+  RESPONSE_POOL: 4
 }
 
 # message fns
@@ -166,6 +172,11 @@ peers.handlers = handlers = {
       else
         await blockchain.replace_chain incoming_blocks, defer e
         if e then throw e
+  )
+
+  # @todo: sync txns
+  incoming_txns: ((incoming_txns) ->
+
   )
 
 }

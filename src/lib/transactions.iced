@@ -13,42 +13,19 @@ curve = (new elliptic.ec 'curve25519')
 addresses = require './addresses'
 hash = require './hash'
 
-###
-Output {
-  address: null
-  amount: 0
+# primary export
+module.exports = txns = {
+  pool: []
 }
-Transaction {
-  id: null
-  from: null
-  signature: null
-  outputs: []
-}
-###
-
-###
-transaction = {
-  id: null
-  from: null
-  last_input_block: null
-  last_output_block: null
-  signature: null
-  outputs: [{
-    address:
-    amount: 0
-  }]
-}
-###
-
-module.exports = txns = {}
 
 txns.get_id = ((transaction,cb) ->
   bulk = transaction.from
+
   #bulk += transaction.last_input_block
   bulk += transaction.last_output_block
 
   for item in transaction.outputs
-    bulk += item.address
+    bulk += item.to
     bulk += item.amount
 
   return cb null, hash.sha256(bulk)
@@ -93,7 +70,7 @@ txns.create = ((opt,cb) ->
     return cb new Error 'Transaction has no outputs'
 
   for item in opt.outputs
-    for x in ['address','amount']
+    for x in ['to','amount']
       return cb new Error "`output.#{x}` required" if !item[x]
 
   transaction = {
@@ -106,11 +83,11 @@ txns.create = ((opt,cb) ->
   }
 
   # add last input/output blocks
-  await @get_last_transaction_blocks opt.from, defer e,last_blocks
-  if e then return cb e
+  await blockchain.get_balance opt.from, defer e,balance
+  if e then return cb
 
-  transaction.last_input_block = last_blocks.last_input_block
-  transaction.last_output_block = last_blocks.last_output_block
+  #transaction.last_input_block = balance?.last_input_block
+  transaction.last_output_block = balance?.last_output_block
 
   # hash the block and sign it
   await @get_id transaction, defer e,transaction.id
@@ -146,7 +123,7 @@ txns.validate = ((transaction,cb) ->
   total_out = 0
 
   for item in opt.outputs
-    for x in ['address','amount']
+    for x in ['to','amount']
       return cb new Error "`output.#{x}` required" if !item[x]
 
     total_out += (+item.amount)
@@ -198,7 +175,7 @@ if !module.parent
     from: addresses.TEST_ADDRESSES.DAN.pub
     priv: addresses.TEST_ADDRESSES.DAN.priv
     outputs: [{
-      address: addresses.TEST_ADDRESSES.BOB.pub
+      to: addresses.TEST_ADDRESSES.BOB.pub
       amount: 5
     }]
   }

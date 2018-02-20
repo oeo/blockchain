@@ -22,6 +22,11 @@ Schema = new mongoose.Schema({
     default: env.DIFFICULTY_LEVEL_START
   }
 
+  solver: {
+    type: String
+    default: null
+  }
+
   proof: {
     type: Number
     default: 0
@@ -103,6 +108,7 @@ Schema.statics.calculate_hash = calculate_hash = ((block_obj) ->
     (block_obj.prev ? null)
 
     block_obj.difficulty
+    block_obj.solver
     block_obj.proof
 
     JSON.stringify(block_obj.data ? {})

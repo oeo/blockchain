@@ -3,6 +3,7 @@ _ = require('wegweg')({
 })
 
 blockchain = require './blockchain'
+transactions = require './transactions'
 peers = require './peers'
 
 app = _.app()
@@ -71,15 +72,44 @@ app.get '/peers-add', ((req,res,next) ->
 # devel
 app.get '/_/mine', ((req,res,next) ->
   addresses = require __dirname + '/addresses'
+
   solver = _.first(_.shuffle(_.keys(addresses.TEST_ADDRESSES)))
+  solver = addresses.TEST_ADDRESSES[solver]
 
   block_data = {
-    solver: addresses.TEST_ADDRESSES[solver].pub
-    notes: "test@#{_.time()}"
+    test: 1
   }
 
-  await blockchain.generate_next_block block_data, defer e,next_block
+  # add test txn
+  if req.query.txn_test
+    test_addrs = _.shuffle(_.keys(addresses.TEST_ADDRESSES))
+
+    from_key = test_addrs.pop()
+    from = addresses.TEST_ADDRESSES[from_key]
+
+    to_key = test_addrs.pop()
+    to = addresses.TEST_ADDRESSES[to_key]
+
+    txn_opt = {
+      from: from.pub
+      priv: from.priv
+      outputs: [{
+        to: to.pub
+        amount: 1
+      }]
+    }
+
+    await transactions.create txn_opt, defer e,transaction
+
+    block_data = {
+      transactions: [transaction]
+    }
+
+  await blockchain.generate_next_block block_data, solver.pub, defer e,next_block
   if e then return next e
+
+  log /next_block/
+  log next_block
 
   await blockchain.add_block next_block, defer e
   if e then return next e
