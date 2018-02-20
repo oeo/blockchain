@@ -5,7 +5,6 @@ _ = require('wegweg')({
 addresses = require './addresses'
 blockchain = require './blockchain'
 transactions = require './transactions'
-
 peers = require './peers'
 
 app = _.app()
