@@ -10,7 +10,7 @@
 - static block reward
 - transactions base
 
-# @todo/1st-pass
+# @todo
 - transaction mempool + p2p sync
 - transaction fees
 - scaling block reward
@@ -20,7 +20,7 @@
 - web wallet
 - cli-based miner
 
-### optimizations
+## @optimizations
 - allow transport of partial chain over websocket
-  - chain offset query support
+  - chain offset query support in p2p
 
