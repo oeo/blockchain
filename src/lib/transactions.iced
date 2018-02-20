@@ -15,6 +15,8 @@ hash = require './hash'
 
 # primary export
 module.exports = txns = {
+
+  # unconfirmed
   pool: []
 }
 
@@ -86,8 +88,8 @@ txns.create = ((opt,cb) ->
   await blockchain.get_balance opt.from, defer e,balance
   if e then return cb
 
-  #transaction.last_input_block = balance?.last_input_block
-  transaction.last_output_block = balance?.last_output_block
+  #transaction.last_input_block = (balance?.last_input_block ? null)
+  transaction.last_output_block = (balance?.last_output_block ? null)
 
   # hash the block and sign it
   await @get_id transaction, defer e,transaction.id
@@ -96,33 +98,39 @@ txns.create = ((opt,cb) ->
   await @get_signature transaction, opt.priv, defer e,transaction.signature
   if e then return cb e
 
+  log /created transaction/
+  log transaction
+
   return cb null, transaction
 )
 
 txns.validate = ((transaction,cb) ->
   blockchain = require __dirname + '/blockchain'
 
+  log /validating transaction/
+  log transaction
+
   required = [
     'id'
     'from'
-    'last_input_block'
-    'last_output_block'
     'signature'
     'outputs'
   ]
 
   for x in required
-    return cb new Error "Invalid transaction (`#{x}` required)" if !opt[x]?
+    return cb new Error "Invalid transaction (`#{x}` required)" if !transaction[x]
 
-  if !opt.outputs?.length
+  transaction.last_output_block ?= null
+
+  if !transaction.outputs?.length
     return cb new Error 'Invalid transaction (no outputs)'
 
-  if _.type(opt.outputs) isnt 'array'
-    opt.outputs = [opt.outputs]
+  if _.type(transaction.outputs) isnt 'array'
+    transaction.outputs = [transaction.outputs]
 
   total_out = 0
 
-  for item in opt.outputs
+  for item in transaction.outputs
     for x in ['to','amount']
       return cb new Error "`output.#{x}` required" if !item[x]
 
@@ -132,19 +140,10 @@ txns.validate = ((transaction,cb) ->
   await blockchain.get_balance transaction.from, defer e,balance
   if e then return cb e
 
-  if !balance
-    return cb new Error 'Invalid transaction (balance not found)'
-
-  if balance?.amount < total_out
+  if !balance or (balance?.amount < total_out)
     return cb new Error 'Invalid transaction (output total exceeds balance)'
 
-  # check last balance input/output blocks
-
-  ###
-  if balance?.last_input_block isnt transaction.last_input_block
-    return cb new Error 'Invalid transaction (`last_input_block`)'
-  ###
-
+  # check last output block
   if balance?.last_output_block isnt transaction.last_output_block
     return cb new Error 'Invalid transaction (`last_output_block`)'
 

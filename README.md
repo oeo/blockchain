@@ -3,17 +3,22 @@
 - scaling proof of work
   - automatic difficulty adjustments
   - cumulative difficulty preference over chain length
-- node rest server
+- http server
 - websocket p2p syncing
   - concensus difficulty
 - keypairs + accounts
+- static block reward
+- transactions base
 
-# @todo
-- transactions (ledger/memos)
+# @todo/1st-pass
+- transaction mempool + p2p sync
+- transaction fees
+- scaling block reward
 - automatic peer discovery
-- leveldb persistence
-- chain/account explorer
-- wallet
+- chain persistence
+- blockchain explorer
+- web wallet
+- cli-based miner
 
 ### optimizations
 - allow transport of partial chain over websocket

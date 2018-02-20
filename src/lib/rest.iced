@@ -95,7 +95,7 @@ app.get '/_/mine', ((req,res,next) ->
       priv: from.priv
       outputs: [{
         to: to.pub
-        amount: 1
+        amount: +(req.query.amount ? 1)
       }]
     }
 
@@ -107,9 +107,6 @@ app.get '/_/mine', ((req,res,next) ->
 
   await blockchain.generate_next_block block_data, solver.pub, defer e,next_block
   if e then return next e
-
-  log /next_block/
-  log next_block
 
   await blockchain.add_block next_block, defer e
   if e then return next e
