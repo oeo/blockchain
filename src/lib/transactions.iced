@@ -16,7 +16,7 @@ hash = require './hash'
 # primary export
 module.exports = txns = {
 
-  # unconfirmed transactions
+  # mempool
   pool: []
 }
 
