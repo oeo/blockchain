@@ -44,7 +44,7 @@ module.exports = txns = {}
 
 txns.get_id = ((transaction,cb) ->
   bulk = transaction.from
-  bulk += transaction.last_input_block
+  #bulk += transaction.last_input_block
   bulk += transaction.last_output_block
 
   for item in transaction.outputs
@@ -99,7 +99,7 @@ txns.create = ((opt,cb) ->
   transaction = {
     id: null
     from: opt.from
-    last_input_block: null
+    #last_input_block: null
     last_output_block: null
     signature: null
     outputs: opt.outputs
@@ -162,8 +162,11 @@ txns.validate = ((transaction,cb) ->
     return cb new Error 'Invalid transaction (output total exceeds balance)'
 
   # check last balance input/output blocks
+
+  ###
   if balance?.last_input_block isnt transaction.last_input_block
     return cb new Error 'Invalid transaction (`last_input_block`)'
+  ###
 
   if balance?.last_output_block isnt transaction.last_output_block
     return cb new Error 'Invalid transaction (`last_output_block`)'
