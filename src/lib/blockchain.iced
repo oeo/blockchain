@@ -24,6 +24,7 @@ blockchain = {
     new Block(GENESIS)
   ]
 
+  # coin balances
   balances: {}
 }
 
@@ -33,8 +34,23 @@ blockchain.get_blockchain = ((cb) ->
   return cb null, @blocks
 )
 
+blockchain.get_balances = ((cb) ->
+  return cb null, @balances
+)
+
+blockchain.get_balance = ((pub,cb) ->
+  return cb null, (@balances[pub] ? null)
+)
+
 blockchain.set_blockchain = ((chain,cb) ->
   @blocks = chain
+
+  await @calculate_balances chain, defer e,balances
+  if e then return cb e
+
+  @balances = balances
+
+  log 'Replaced my chain with a new one', chain.length
   require('./peers').broadcast_last_block()
 
   return cb null, true
@@ -61,11 +77,13 @@ blockchain.add_block = ((block,cb) ->
   new_block = new Block(block)
   @blocks.push new_block
 
+  await @calculate_balances @blocks, defer e,balances
+  if e then return cb e
+
+  @balances = balances
+
   log 'Added a new block', new_block
-
   require('./peers').broadcast_last_block()
-
-  log 'update_unspent_outputs()'
 
   return cb null, true
 )
@@ -198,11 +216,8 @@ blockchain.generate_next_block = ((data,cb) ->
   block_base = {
     index: (last.index + 1)
     ctime: _.time()
-
     prev: last.hash
-
     difficulty: difficulty
-
     data: data
   }
 
@@ -269,6 +284,57 @@ blockchain.calculate_difficulty_weight = ((blocks=null,cb) ->
     weight += Math.pow(2,(block.difficulty ? 0))
 
   return cb null, weight
+)
+
+# calculate coin balances
+blockchain.calculate_balances = ((blocks=null,cb) ->
+  if !blocks
+    await @get_blockchain defer e,blocks
+    if e then return cb e
+
+  balances = {}
+
+  # iterate blocks
+  for block in blocks
+
+    # add transactions
+    if block.data?.transactions?.length
+      for transaction in block.data.transactions
+        total_out = 0
+
+        for output in outputs
+          balances[output.to] ?= {
+            last_input_block: null
+            last_output_block: null
+            amount: 0
+          }
+
+          balances[output.to].last_input_block = block.index
+          balances[output.to].amount += output.amount
+
+          total_out += output.amount
+
+        balances[transaction.from] ?= {
+          last_input_block: null
+          last_output_block: null
+          amount: 0
+        }
+
+        balances[transaction.from].last_output_block = block.index
+        balances[transaction.from].amount -= total_out
+
+    # add block reward
+    if block.data?.solver
+      balances[block.data.solver] ?= {
+        last_input_block: null
+        last_output_block: null
+        amount: 0
+      }
+
+      balances[block.data.solver].last_input_block = block.index
+      balances[block.data.solver].amount += (+CONFIG.BLOCK_REWARD)
+
+  return cb null, balances
 )
 
 ##

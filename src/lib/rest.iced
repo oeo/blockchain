@@ -37,6 +37,27 @@ app.get '/blocks/:index_or_hash', ((req,res,next) ->
   return res.json block
 )
 
+# coin balances
+app.get '/balances', ((req,res,next) ->
+  await blockchain.get_balances defer e,balances
+  if e then return next e
+
+  return res.json balances
+)
+
+# single address balance
+app.get '/balances/:address', ((req,res,next) ->
+  await blockchain.get_balance req.params.address, defer e,balance
+  if e then return next e
+
+  return res.json(balance)
+)
+
+# single transaction
+app.get '/transactions/:hash', ((req,res,next) ->
+  return next new Error '@todo'
+)
+
 # peers
 app.get '/peers', ((req,res,next) ->
   return res.json true
@@ -49,7 +70,15 @@ app.get '/peers-add', ((req,res,next) ->
 
 # devel
 app.get '/_/mine', ((req,res,next) ->
-  await blockchain.generate_next_block {test:1}, defer e,next_block
+  addresses = require __dirname + '/addresses'
+  solver = _.first(_.shuffle(_.keys(addresses.TEST_ADDRESSES)))
+
+  block_data = {
+    solver: addresses.TEST_ADDRESSES[solver].pub
+    notes: "test@#{_.time()}"
+  }
+
+  await blockchain.generate_next_block block_data, defer e,next_block
   if e then return next e
 
   await blockchain.add_block next_block, defer e
