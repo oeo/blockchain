@@ -3,7 +3,7 @@
 - scaling proof of work
   - automatic difficulty adjustments
   - cumulative difficulty preference over chain length
-- node http rest server
+- http rest server
 - websocket p2p sync
   - concensus difficulty
 - keypairs/accounts/wallets
