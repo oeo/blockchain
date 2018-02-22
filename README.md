@@ -16,11 +16,9 @@
 - dynamic block reward
 - p2p discovery
   - https://ethereum.stackexchange.com/questions/7743/what-are-the-peer-discovery-mechanisms-involved-in-ethereum
-- chain persistence
-  - redis/leveldb
-- express utility apps
-  - chain explorer
-  - web wallet
+- chain persistence (redis)
+- chain explorer
+- web wallet
 - cli mining script/bin
 
 ## @later
