@@ -195,7 +195,7 @@
   });
 
   txns.validate = (function(transaction, cb) {
-    var balance, blockchain, calculated_tid, e, item, required, total_out, valid, x, ___iced_passed_deferral, __iced_deferrals, __iced_k, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+    var balance, blockchain, calculated_tid, e, item, required, sig_valid, total_out, x, ___iced_passed_deferral, __iced_deferrals, __iced_k, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     required = ['id', 'from', 'signature', 'outputs'];
@@ -287,7 +287,7 @@
               assign_fn: (function() {
                 return function() {
                   e = arguments[0];
-                  return valid = arguments[1];
+                  return sig_valid = arguments[1];
                 };
               })(),
               lineno: 137
@@ -297,7 +297,7 @@
             if (e) {
               return cb(e);
             }
-            if (!valid) {
+            if (!sig_valid) {
               return cb(new Error('Invalid transaction (`signature`)'));
             }
             return cb(null, true);
