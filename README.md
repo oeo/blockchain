@@ -26,13 +26,14 @@
   - transaction, transaction output
   - address
 - allow transport of partial chain over websocket
-  - chain offset query support in p2p to minimize data in the pipe
+  - merkle tree provides an index
+  - offset query support to minimize data in the pipe
 - anonymous transactions
-  - utilize static wallet and implement redeemables or masternodes to obfuscate origin
-  - don't have to nessessarily be the most convenient
-- modify address algo for shorter addresses (currently using `secp256k1`)
+  - utilize static address and implement redeemables or masternodes to obfuscate origin?
+  - doesn't nessessarily need to be convenient
+- modify address algo for shorter addresses
 - cluster support
-  - websocket complications
+  - address websocket complications
 - docker wrap
 
 ---
