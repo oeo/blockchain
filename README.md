@@ -35,5 +35,7 @@
   - utilize static wallet and implement redeemables or masternodes to obfuscate origin
   - don't have to nessessarily be the most convenient
 - modify address algo for shorter addresses (currently using `secp256k1`)
+- cluster support
+  - websocket complications
 - docker wrap
 
