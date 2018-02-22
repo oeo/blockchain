@@ -23,14 +23,14 @@
   - web wallet
 - cli mining script/bin
 
-# @todo.1
+## @later
 - refactor native entities into mongoose models
   - transaction, transaction output
   - address
 - allow transport of partial chain over websocket
   - chain offset query support in p2p to minimize data in the pipe
 
-# @todo.2
+## @future
 - anonymous transactions
   - utilize static wallet and implement redeemables or masternodes to obfuscate origin
   - don't have to nessessarily be the most convenient
