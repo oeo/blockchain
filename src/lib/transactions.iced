@@ -135,10 +135,10 @@ txns.validate = ((transaction,cb) ->
     return cb new Error 'Invalid transaction (`id`)'
 
   # validate signature
-  await @verify_signature transaction, defer e,valid
+  await @verify_signature transaction, defer e,sig_valid
   if e then return cb e
 
-  if !valid
+  if !sig_valid
     return cb new Error 'Invalid transaction (`signature`)'
 
   # txn is fine
