@@ -14,7 +14,7 @@
 - txn mempool w/ p2p sync
   - consensus block generation by nodes
 - txn fees
-- block reward
+- dynamic block reward
 - p2p discovery/bootstrap nodes
 - redis chain persistence
 - chain explorer/web wallet
