@@ -17,7 +17,8 @@
 - dynamic block reward
 - p2p discovery/bootstrap nodes
 - redis chain persistence
-- chain explorer/web wallet
+- chain explorer
+- web wallet
 - node mining flag
 - standalone mining script
 
