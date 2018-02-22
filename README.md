@@ -3,8 +3,8 @@
 - scaling proof of work
   - automatic difficulty adjustments
   - cumulative difficulty preference over chain length
-- http rest server
-- websocket p2p syncing
+- node http rest server
+- websocket p2p sync
   - concensus difficulty
 - keypairs/accounts/wallets
 - static block reward
@@ -13,14 +13,27 @@
 # @todo
 - transaction mempool + p2p sync
 - transaction fees
-- scaling block reward
-- automatic peer discovery
+- dynamic block reward
+- p2p discovery
+  - @link https://ethereum.stackexchange.com/questions/7743/what-are-the-peer-discovery-mechanisms-involved-in-ethereum
 - chain persistence
-- blockchain explorer
-- web wallet
-- cli-based miner
+  - redis/leveldb
+- express utility apps
+  - chain explorer
+  - web wallet
+- cli mining script/bin
 
-## @optimizations
+# @todo.1
+- refactor native entities into mongoose models
+  - transaction, transaction output
+  - address
 - allow transport of partial chain over websocket
-  - chain offset query support in p2p
+  - chain offset query support in p2p to minimize data in the pipe
+
+# @todo.2
+- anonymous transactions
+  - utilize static wallet and implement redeemables or masternodes to obfuscate origin
+  - don't have to nessessarily be the most convenient
+- modify address algo for shorter addresses (currently using `secp256k1`)
+- docker wrap
 
