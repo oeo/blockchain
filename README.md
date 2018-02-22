@@ -11,7 +11,7 @@
 - transactions base
 
 # @todo
-- txn mempool w/ p2p sync
+- txn mempool integrated with p2p sync
   - consensus block generation by nodes
 - txn fees
 - dynamic block reward
