@@ -12,7 +12,7 @@
 
 # @todo
 - txn mempool w/ p2p sync
-  - node consensus block generation
+  - consensus block generation by nodes
 - txn fees
 - block reward
 - p2p discovery/bootstrap nodes
