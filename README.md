@@ -15,7 +15,7 @@
 - transaction fees
 - dynamic block reward
 - p2p discovery
-  - @link https://ethereum.stackexchange.com/questions/7743/what-are-the-peer-discovery-mechanisms-involved-in-ethereum
+  - https://ethereum.stackexchange.com/questions/7743/what-are-the-peer-discovery-mechanisms-involved-in-ethereum
 - chain persistence
   - redis/leveldb
 - express utility apps
