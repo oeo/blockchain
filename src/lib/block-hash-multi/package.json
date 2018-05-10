@@ -1,0 +1,14 @@
+{
+  "name": "multihash",
+  "version": "1.0.0",
+  "description": "",
+  "main": "module.iced",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
+}
