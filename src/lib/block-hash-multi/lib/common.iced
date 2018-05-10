@@ -52,8 +52,7 @@ common.sha512 = ((str) ->
 
 common.find_fn = ((char) ->
   chars = "0123456789abcdef".split('')
-  index = chars.indexOf(char)
-  return common.MULTI[index]
+  return common.MULTI[chars.indexOf(char)]
 )
 
 ##
