@@ -5,6 +5,7 @@ if !module.parent
 
 _ = require('wegweg')({
   globals: on
+  shelljs: on
 })
 
 elliptic = require 'elliptic'
@@ -13,7 +14,7 @@ curve = new elliptic.ec 'secp256k1'
 hash = require './hash'
 
 TEST_ADDRESSES = {
-  "DAN": {
+  "ALICE": {
     "pub": "0427370d20225a64eb86a11e8b2fcbfaa3454d2644f9bc4e6f95b592dbee70deb58aca3227f5daa87033b87e274968bc027f4872e51c0c6d23ed7ad2a3d87d8761",
     "priv": "474b9101f2c61e9ad61051e269e832c4"
   },
@@ -86,7 +87,7 @@ addresses._random_str = ((len=128) ->
 if !module.parent
   log /TEST/
 
-  DAN = TEST_ADDRESSES.DAN
+  ALICE = TEST_ADDRESSES.ALICE
   BOB = TEST_ADDRESSES.BOB
 
   bulk = """
@@ -99,12 +100,12 @@ if !module.parent
   log addr
   ###
 
-  signed = addresses.sign(bulk,DAN.priv)
-  log /signed/, /DAN/
+  signed = addresses.sign(bulk,ALICE.priv)
+  log /signed/, /ALICE/
   log signed
 
-  verified = addresses.verify(bulk,signed,DAN.pub)
-  log /verified/, /DAN/, /should be true/
+  verified = addresses.verify(bulk,signed,ALICE.pub)
+  log /verified/, /ALICE/, /should be true/
   log verified
 
   verified = addresses.verify(bulk,signed,BOB.pub)

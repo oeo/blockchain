@@ -5,6 +5,7 @@ if !module.parent
 
 _ = require('wegweg')({
   globals: on
+  shelljs: on
 })
 
 Block = require './block'
@@ -24,7 +25,6 @@ blockchain = {
     new Block(GENESIS)
   ]
 
-  # coin balances
   balances: {}
 }
 

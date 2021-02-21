@@ -5,6 +5,7 @@ if !module.parent
 
 _ = require('wegweg')({
   globals: on
+  shelljs: on
 })
 
 elliptic = require 'elliptic'
@@ -13,12 +14,7 @@ curve = (new elliptic.ec 'curve25519')
 addresses = require './addresses'
 hash = require './hash'
 
-# primary export
-module.exports = txns = {
-
-  # mempool
-  pool: []
-}
+module.exports = txns = {}
 
 txns.get_id = ((transaction,cb) ->
   bulk = transaction.from
@@ -120,6 +116,9 @@ txns.validate = ((transaction,cb) ->
   await blockchain.get_balance transaction.from, defer e,balance
   if e then return cb e
 
+  # @todo: factor in mempool outputs for `balance`
+  # ..
+
   if !balance or (balance?.amount < total_out)
     return cb new Error 'Invalid transaction (output total exceeds balance)'
 
@@ -151,8 +150,8 @@ if !module.parent
   log /TEST/
 
   txn_opt = {
-    from: addresses.TEST_ADDRESSES.DAN.pub
-    priv: addresses.TEST_ADDRESSES.DAN.priv
+    from: addresses.TEST_ADDRESSES.ALICE.pub
+    priv: addresses.TEST_ADDRESSES.ALICE.priv
     outputs: [{
       to: addresses.TEST_ADDRESSES.BOB.pub
       amount: 5

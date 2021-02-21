@@ -1,26 +1,26 @@
+# @todo
+- gradient chain implementation
+  - difficulty/fees
+  - based on transfer amount
+- [/] mining script
+- enforce block size limit
+- persist: leveldb for chain, redis general storage
+- consensus unix epoch
+  - doesn't nessessarily need to be accurate
+- p2p node discovery
+- p2p mempool
+
 # @done
-- sha256 memory blockchain
+- sha256 blockchain
 - scaling proof of work
   - automatic difficulty adjustments
   - cumulative difficulty preference over chain length
 - http rest server
 - websocket p2p sync
   - concensus difficulty
-- keypairs/accounts/wallets
+- keypairs/wallets
 - static block reward
 - transactions base
-
-# @todo
-- txn mempool integrated with p2p sync
-  - consensus block generation by nodes
-- txn fees
-- dynamic block reward
-- p2p discovery/bootstrap nodes
-- redis chain persistence
-- chain explorer
-- web wallet
-- node mining flag
-- standalone mining script
 
 ## @later
 - convert native entities into mongoose models
@@ -28,14 +28,17 @@
   - address
 - allow transport of partial chain over websocket
   - merkle tree provides an index
-  - offset query support to minimize data in the pipe
-- anonymous transactions
-  - utilize static address and implement redeemables or masternodes to obfuscate origin?
-  - doesn't nessessarily need to be convenient
+  - block height offset query support to minimize data in the pipe
 - modify address algo for shorter addresses
-- cluster support
-  - address websocket complications
+- web wallet
+- chain explorer
+
+## @eventual
+- remove + internalize all deps
 - docker wrap
+- anonymous transactions
+  - doesn't nessessarily need to be convenient
+  - doesn't nessessarily need to be cheap
 
 ---
 

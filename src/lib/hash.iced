@@ -1,5 +1,6 @@
 _ = require('wegweg')({
   globals: on
+  shelljs: on
 })
 
 crypto = require 'crypto'

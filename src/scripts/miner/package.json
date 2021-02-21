@@ -1,0 +1,14 @@
+{
+  "name": "miner",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --exec iced -- ./src/miner.iced"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "^7.3.3",
+    "ora": "^5.3.0",
+    "wegweg": "^0.21.0"
+  }
+}

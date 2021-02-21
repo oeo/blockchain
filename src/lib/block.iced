@@ -1,5 +1,6 @@
 _ = require('wegweg')({
   globals: on
+  shelljs: on
 })
 
 mongoose = require 'mongoose'
