@@ -17,8 +17,6 @@ LAST_BLOCK = null
 ATTEMPTS = 0
 
 ####
-
-# --help
 help = (->
   log """
     Usage: . [options]
@@ -30,12 +28,6 @@ help = (->
   """
 )
 
-# runtime logic
-if _.arg('help')
-  help()
-  exit 0
-
-# main loop
 mine = ((opt={},cb) ->
   _update_spinner = (-> spinner.start('Mining, attempts=' + ATTEMPTS))
   _heartbeat (e) ->
@@ -85,7 +77,11 @@ _heartbeat = ((cb=null) ->
   return cb()
 )
 
-##
-spinner.info('Using node ' + BASE_URL)
-mine {}, -> 1
+####
+if _.arg('help')
+  help()
+  exit 0
+else
+  spinner.info('Using node ' + BASE_URL)
+  mine {}, -> 1
 
