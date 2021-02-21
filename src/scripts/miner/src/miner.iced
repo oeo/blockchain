@@ -89,7 +89,7 @@ _gather_block = ((opt,cb=null) ->
 
   await setTimeout defer(), 3000
 
-  return cb()
+  return cb null, true
 )
 
 # @todo
