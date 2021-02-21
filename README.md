@@ -2,7 +2,7 @@
 - gradient chain implementation
   - difficulty/fees
   - based on transfer amount
-- [/] mining script
+- [x] mining script
 - enforce block size limit
 - persist: leveldb for chain, redis general storage
 - consensus unix epoch
