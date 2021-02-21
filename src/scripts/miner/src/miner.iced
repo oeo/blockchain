@@ -85,11 +85,9 @@ _get_solver_address = ((cb=null) ->
 
 _gather_block = ((opt,cb=null) ->
   if !cb then cb = -> 1
-  spinner.start 'Gathering a block to mine from the mempool'
+  spinner.start 'Constructing a block from the mempool'
 
   await setTimeout defer(), 3000
-
-  _alert_block_mined(LAST_BLOCK)
 
   return cb()
 )

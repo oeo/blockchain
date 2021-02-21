@@ -21,6 +21,17 @@ mempool.add = ((transaction,cb) ->
 
   @items.push transaction
 
+  # sort transactions by total output amount, smallest first
+  @items = (_.sortBy @items, (mempool_transaction) ->
+    return (_.sum (mempool_transaction.outputs ? []), (outputs) ->
+      if !outputs then return 0
+      i = 0
+      for o in outputs
+        i += o.amount
+      return i
+    )
+  )
+
   # @todo: broadcast new mempool item
   # ..
 
