@@ -1,8 +1,7 @@
 # @todo
 - [ ] gradient chain implementation
-  - [ ] difficulty/fees
-  - [ ] based on transfer amount
-  - [ ] mining script
+  - [ ] difficulty based on total outputs of transactions in block
+  - [ ] create standalone mining script
 - [ ] enforce block size limit
 - [ ] persist: leveldb for chain, redis general storage
 - [ ] consensus unix epoch
