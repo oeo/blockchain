@@ -1,14 +1,14 @@
 # @todo
-- gradient chain implementation
-  - difficulty/fees
-  - based on transfer amount
+- [ ] gradient chain implementation
+  - [ ] difficulty/fees
+  - [ ] based on transfer amount
   - [ ] mining script
-- enforce block size limit
-- persist: leveldb for chain, redis general storage
-- consensus unix epoch
+- [ ] enforce block size limit
+- [ ] persist: leveldb for chain, redis general storage
+- [ ] consensus unix epoch
   - doesn't nessessarily need to be accurate
-- p2p node discovery
-- p2p mempool
+- [ ] p2p node discovery
+- [ ] p2p mempool
 
 # @done
 - sha256 blockchain
