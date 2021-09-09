@@ -1,6 +1,7 @@
 # @todo
 - [x] create standalone mining script
-- [ ] deflationary block reward
+- [ ] mempool cleanup on block mine
+- [ ] deflate block reward
 - [ ] transaction fees
 - [ ] enforce block size limit
 - [ ] persist: leveldb for chain, redis general storage
