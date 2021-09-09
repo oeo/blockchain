@@ -38,6 +38,18 @@ mempool.add = ((transaction,cb) ->
   return cb null, true
 )
 
+mempool.get_total_outputs_from_address = ((addr,cb) ->
+  total = (_.sumBy @items, (txn) ->
+    total_out = 0
+    for x in txn?.outputs
+      if x.from is addr
+        total_out += (+x.amount)
+    return total_out
+  )
+
+  return cb null, total
+)
+
 ## test
 if !module.parent
 

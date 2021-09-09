@@ -23,34 +23,38 @@ help = (->
   log """
     Usage: . [options]
     Options:
-      --solver <addr>\tSpecify block block reward address
+      --solver <addr>\tSpecify block reward address
       --node <url>\t\tSpecify node REST endpoint
-      --easy\t\tPrioritize easy transactions
-      --hard\t\tPrioritize hard transactions
+      --sortfee\t\tPrioritize high fee transactions
   """
 )
 
 ####
 mine = ((opt={},cb) ->
-  _update_spinner = -> spinner.start('Mining a block. ATTEMPTS=' + ATTEMPTS)
-  _heartbeat (e) ->
-    if e
-      await setTimeout defer(), 100
-      return mine(opt,cb)
-    else
-      setInterval _heartbeat, 100
-
-    await _get_solver_address defer e,pub
+  if !SOLVER_ADDRESS
+    await _get_solver_address defer e,SOLVER_ADDRESS
     if e then throw e
 
-    SOLVER_ADDRESS = pub
-    spinner.stopAndPersist(symbol:'🔑',text:'Solver: ' + SOLVER_ADDRESS)
+  while 1
 
-    while 1
-      await _gather_block opt, defer e,block
-      if e then continue
+    spinner.start('Gathering a new block from the mempool..')
 
-    _update_spinner()
+    await _gather_block opt, defer e,fresh_block
+    if e then continue
+
+    spinner.start('Mining a fresh block..')
+
+    await _solve_block fresh_block, defer e,solved_block
+    if e then continue
+    if !solved_block then continue
+
+    spinner.stopAndPersist(symbol:'💎',text:'Solved block ' + solved_block.hash)
+
+    await _add_solved_block solved_block, defer e,success
+    if e then continue
+
+    setTimeout mine, 1
+    break
 )
 
 _get_solver_address = ((cb=null) ->
@@ -58,7 +62,7 @@ _get_solver_address = ((cb=null) ->
     return cb null, SOLVER_ADDRESS
 
   # use dotfile
-  if _.exists(SOLVER_DOTFILE = require('os').homedir() + '/.gradient.json')
+  if _.exists(SOLVER_DOTFILE = require('os').homedir() + '/.blockchain.json')
     try
       obj = JSON.parse(_.reads SOLVER_DOTFILE)
     catch e
@@ -85,11 +89,65 @@ _get_solver_address = ((cb=null) ->
 
 _gather_block = ((opt,cb=null) ->
   if !cb then cb = -> 1
-  spinner.start 'Constructing a block from the mempool'
+  spinner.start 'Constructing new block from the mempool'
 
-  await setTimeout defer(), 3000
+  # get mempool
+  await _.get BASE_URL + '/', defer e,r,base
+  if e then throw e
+
+  NODE_METADATA = base
+  LAST_BLOCK = NODE_METADATA.last_block
+
+  # get mempool
+  await _.get BASE_URL + '/mempool', defer e,r,mempool
+  if e then throw e
+
+  new_block = {
+    index: (LAST_BLOCK.index + 1)
+    ctime: _.time()
+    prev: LAST_BLOCK.hash
+    difficulty: NODE_METADATA.difficulty
+    solver: SOLVER_ADDRESS
+    data: {}
+  }
+
+  # if mempool has length
+  if mempool?.length
+    new_block.data.transactions = mempool.slice(0,10)
+
+  return cb null, new_block
+)
+
+_add_solved_block = ((block,cb) ->
+  if !cb then cb = -> 1
+  spinner.start 'Submitting solved block', block
+
+  await _.post BASE_URL + '/blocks', block, defer e,r,b
+  if e then throw e
 
   return cb null, true
+)
+
+_solve_block = ((block,cb) ->
+  Block = require __dirname + '/../../../lib/block'
+
+  block.proof ?= 0
+  i = 0
+
+  while 1
+    i += 1
+    if i > 100000 then break
+
+    block.hash = Block.calculate_hash(block)
+
+    if Block.is_valid_proof(block)
+      return cb null, block
+    else
+      block.proof = _.rand(0,Number.MAX_SAFE_INTEGER)
+
+    await setTimeout defer(), 1
+
+  return cb null, false
 )
 
 # @todo
@@ -103,32 +161,6 @@ _output_json = ((obj) ->
     line = '> ' + line
     return line
   return arr.join '\n'
-)
-
-HEARTBEAT_WORKING = false
-
-_heartbeat = ((cb=null) ->
-  if !cb then cb = -> 1
-
-  return cb(new Error 'Heartbeat already working') if HEARTBEAT_WORKING
-  HEARTBEAT_WORKING = true
-
-  await _.get BASE_URL, defer e,r,b
-
-  if e or !b?.last_block?.hash
-    HEARTBEAT_WORKING = false
-    return cb(e)
-
-  if b?.last_block?.hash isnt LAST_BLOCK?.hash
-    spinner.stopAndPersist(symbol:'🔔',text:'New block')
-    log chalk.dim _output_json(b.last_block)
-    spinner.start()
-
-    NODE_METADATA = b
-    LAST_BLOCK = b.last_block
-
-  HEARTBEAT_WORKING = false
-  return cb()
 )
 
 ####

@@ -262,8 +262,8 @@ blockchain.get_difficulty = ((cb) ->
   difficulty = +(last.difficulty ? env.DIFFICULTY_LEVEL_START)
 
   # adjust difficulty based on last block's solve-time
-  if (last.index % env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS is 0) and last.index isnt 0
-    last_adjustment_index = (last.index + 1 - (+env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS))
+  if (last.index % env.DIFFICULTY_ADJUSTMENT_INTERVAL_BLOCKS is 0) and last.index isnt 0
+    last_adjustment_index = (last.index + 1 - (+env.DIFFICULTY_ADJUSTMENT_INTERVAL_BLOCKS))
 
     await @get_block last_adjustment_index, defer e,last_adjustment_block
     if e then return cb e
@@ -272,7 +272,7 @@ blockchain.get_difficulty = ((cb) ->
 
     difficulty = last_adjustment_block.difficulty
 
-    secs_expected = (+env.DIFFICULTY_INCREASE_INTERVAL_BLOCKS * +env.DIFFICULTY_SOLVE_INTERVAL_SECS)
+    secs_expected = (+env.DIFFICULTY_ADJUSTMENT_INTERVAL_BLOCKS * +env.DIFFICULTY_SOLVE_INTERVAL_SECS)
     secs_elapsed = (last.ctime - last_adjustment_block.ctime)
 
     # too fast, increase difficulty
@@ -345,7 +345,7 @@ blockchain.calculate_balances = ((blocks=null,cb) ->
       }
 
       balances[block.solver].last_input_block = block.index
-      balances[block.solver].amount += (+CONFIG.BLOCK_REWARD)
+      balances[block.solver].amount += (+CONFIG.BLOCK_REWARD_STATIC)
 
   return cb null, balances
 )

@@ -1,25 +1,23 @@
 # @todo
-- [ ] gradient chain implementation
-  - [ ] difficulty based on total outputs of transactions in block
-  - [ ] create standalone mining script
+- [x] create standalone mining script
+- [ ] deflationary block reward
+- [ ] transaction fees
 - [ ] enforce block size limit
 - [ ] persist: leveldb for chain, redis general storage
-- [ ] consensus unix epoch
-  - doesn't nessessarily need to be accurate
 - [ ] p2p node discovery
 - [ ] p2p mempool
 
 # @done
-- sha256 blockchain
-- scaling proof of work
+- [x] sha256 blockchain
+- [x] scaling proof of work
   - automatic difficulty adjustments
   - cumulative difficulty preference over chain length
-- http rest server
-- websocket p2p sync
+- [x] http rest server
+- [x] websocket p2p sync
   - concensus difficulty
-- keypairs/wallets
-- static block reward
-- transactions base
+- [x] keypairs/wallets
+- [x] static block reward
+- [x] transactions base
 
 ## @later
 - convert native entities into mongoose models
@@ -35,9 +33,6 @@
 ## @eventual
 - remove + internalize all deps
 - docker wrap
-- anonymous transactions
-  - doesn't nessessarily need to be convenient
-  - doesn't nessessarily need to be cheap
 
 ---
 

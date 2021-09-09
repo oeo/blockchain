@@ -36,7 +36,7 @@ Schema = new mongoose.Schema({
   # txns
   data: {
     type: mongoose.Schema.Types.Mixed
-    default: null
+    default: {}
   }
 
 },{_id:false})
@@ -74,7 +74,7 @@ Schema.statics.is_valid_schema = ((block_obj) ->
   }
 
   # ignore `prev` on the genesis block
-  if block_obj.index is 0 and block_obj.hash is hash.auto(env.GENESIS_HASH_STRING)
+  if block_obj?.index is 0 and block_obj?.hash is hash.auto(env.GENESIS_HASH_STRING)
     for key in [
       'prev'
       'data'
@@ -84,6 +84,8 @@ Schema.statics.is_valid_schema = ((block_obj) ->
   for k,v of props
     return false if !block_obj[k]?
     if v
+      if typeof block_obj[k] is 'string' and v is 'number'
+        block_obj[k] = +block_obj[k]
       return false if typeof block_obj[k] isnt v
 
   return true

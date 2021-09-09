@@ -11,6 +11,11 @@ peers = require './peers'
 
 app = _.app()
 
+body_parser = require 'body-parser'
+
+app.use(body_parser.urlencoded(extended:on))
+app.use(body_parser.json())
+
 # allow method override
 app.use ((req,res,next) ->
   valid_methods = [
@@ -38,9 +43,11 @@ app.get '/', ((req,res,next) ->
   await blockchain.get_last_block defer e,block
   if e then return next e
 
+  await blockchain.get_difficulty defer e,difficulty
+
   return res.json {
     height: block.index
-    difficulty: block.difficulty
+    difficulty: difficulty
     mempool_size: mempool.items.length
     last_block: block
   }
@@ -68,6 +75,17 @@ app.get '/blocks/:index_or_hash', ((req,res,next) ->
     return next new Error 'Block not found', req.query.q
 
   return res.json block
+)
+
+# add block
+app.post '/blocks', ((req,res,next) ->
+  Block = require __dirname + '/block'
+  new_block = new Block(req.body)
+
+  await blockchain.add_block new_block, defer e
+  if e then return next e
+
+  return res.json true
 )
 
 # all wallets

@@ -116,8 +116,13 @@ txns.validate = ((transaction,cb) ->
   await blockchain.get_balance transaction.from, defer e,balance
   if e then return cb e
 
-  # @todo: factor in mempool outputs for `balance`
-  # ..
+  # factor in mempool outputs for `balance`
+  mempool = require __dirname + '/mempool'
+
+  await mempool.get_total_outputs_from_address opt.from, defer e,mempool_out
+  if e then return cb e
+
+  total_out += mempool_out
 
   if !balance or (balance?.amount < total_out)
     return cb new Error 'Invalid transaction (output total exceeds balance)'
