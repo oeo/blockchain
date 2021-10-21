@@ -1,3 +1,10 @@
+# install
+```
+npm install -g yarn nodemon iced-coffee-script 
+yarn
+yarn dev
+```
+
 # @todo
 - [x] create standalone mining script
 - [ ] mempool cleanup on block mine
